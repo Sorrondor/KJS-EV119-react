@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import UserHeader from '../../components/header/UserHeader';
 import * as S from './style';
 
 const EmergencyRoomDetail = () => {
@@ -113,6 +114,7 @@ const EmergencyRoomDetail = () => {
 
   return (
     <S.Container>
+      <UserHeader />
       <S.Header>
         <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
         <S.Title>{room.fullName}</S.Title>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PatientAlertButton from '../../components/patientAlert/PatientAlertButton';
+import UserHeader from '../../components/header/UserHeader';
 import * as S from './style';
 
 const MapContainer = () => {
@@ -93,8 +94,9 @@ const MapContainer = () => {
 
   return (
     <S.Container>
+      <UserHeader />
       <S.Header>
-        <S.Title>주변 응급실 한눈에 보기</S.Title>
+        <S.Title>EV 주변 응급실 한눈에 보기</S.Title>
         <S.Description>
           사용자의 현재 위치를 기준으로 응급실 위치와 상태를 실시간으로 정렬해서 보여주는 화면입니다.
         </S.Description>

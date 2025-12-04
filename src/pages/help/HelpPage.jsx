@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import UserHeader from '../../components/header/UserHeader';
 import * as S from './style';
 
 const HelpPage = () => {
@@ -109,6 +110,7 @@ const HelpPage = () => {
 
   return (
     <S.Container>
+      <UserHeader />
       <S.Header>
         <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
         <S.Title>도움말</S.Title>
