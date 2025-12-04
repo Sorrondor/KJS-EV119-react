@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Container = styled.div`
   width: 100%;
   min-height: 100vh;
-  background-color: #F5F5F5;
+  background-color: #FAFAFA;
   display: flex;
   flex-direction: column;
   padding-bottom: 100px;
@@ -12,7 +12,7 @@ export const Container = styled.div`
 export const Header = styled.div`
   width: 100%;
   padding: 24px 20px;
-  background-color: #F8F8F8;
+  background-color: #FAFAFA;
   border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 `;
@@ -56,7 +56,7 @@ export const DestinationCard = styled.div`
   padding: 20px;
   background: linear-gradient(135deg, #FFF5F5 0%, #FFE5E5 100%);
   border-radius: 12px;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   margin-bottom: 24px;
 `;
 
@@ -85,7 +85,7 @@ export const RouteInfo = styled.div`
   padding: 20px;
   background-color: #FFF9F9;
   border-radius: 12px;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
 `;
 
 export const RouteToggle = styled.div`
@@ -99,7 +99,7 @@ export const ToggleButton = styled.button`
   height: 44px;
   background-color: ${props => props.$active ? '#CD0B16' : '#FFFFFF'};
   color: ${props => props.$active ? '#FFFFFF' : '#CD0B16'};
-  border: 2px solid #CD0B16;
+  border: 2px solid rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
@@ -145,7 +145,7 @@ export const RouteArrow = styled.div`
 
 export const RouteDivider = styled.div`
   height: 1px;
-  background-color: #FFE5E5;
+  background-color: rgba(0, 0, 0, 0.1);
   margin: 12px 0;
 `;
 
@@ -154,7 +154,7 @@ export const MapArea = styled.div`
   height: 300px;
   background-color: #F5F5F5;
   border-radius: 12px;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
@@ -166,24 +166,24 @@ export const MapPlaceholder = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FFF5F5 0%, #FFE5E5 100%);
+  background: #E0E0E0;
 `;
 
 export const MapInstruction = styled.p`
-  color: #999999;
+  color: #666666;
   font-size: 16px;
   text-align: center;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: #F5F5F5;
   border-radius: 8px;
-  border: 2px dashed #FFCCCC;
+  border: 2px dashed #CCCCCC;
 `;
 
 export const RouteSteps = styled.div`
   padding: 20px;
   background-color: #FFF9F9;
   border-radius: 12px;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
 `;
 
 export const StepsTitle = styled.h3`
@@ -230,7 +230,7 @@ export const ActionButtons = styled.div`
   left: 0;
   right: 0;
   padding: 20px;
-  background-color: #F8F8F8;
+  background-color: #FAFAFA;
   border-top: 2px solid rgba(0, 0, 0, 0.05);
   display: flex;
   gap: 12px;
@@ -266,7 +266,7 @@ export const SecondaryButton = styled.button`
   height: 56px;
   background-color: #FFFFFF;
   color: #CD0B16;
-  border: 2px solid #CD0B16;
+  border: 2px solid rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   font-size: 18px;
   font-weight: 700;

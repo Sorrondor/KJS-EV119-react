@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Container = styled.div`
   width: 100%;
   min-height: 100vh;
-  background-color: #F5F5F5;
+  background-color: #FAFAFA;
   display: flex;
   flex-direction: column;
 `;
@@ -11,7 +11,7 @@ export const Container = styled.div`
 export const Header = styled.div`
   width: 100%;
   padding: 24px 20px;
-  background-color: #F8F8F8;
+  background-color: #FAFAFA;
   border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 `;
@@ -58,13 +58,13 @@ export const Content = styled.div`
 export const HelpSection = styled.div`
   margin-bottom: 16px;
   background-color: #FFFFFF;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #CD0B16;
+    border-color: rgba(0, 0, 0, 0.3);
     box-shadow: 0 2px 8px rgba(205, 11, 22, 0.1);
   }
 `;
@@ -101,7 +101,7 @@ export const ToggleIcon = styled.div`
 export const SectionContent = styled.div`
   padding: 20px;
   background-color: #FFFFFF;
-  border-top: 1px solid #FFE5E5;
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
   line-height: 1.8;
 `;
 

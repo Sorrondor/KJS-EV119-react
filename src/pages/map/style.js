@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Container = styled.div`
   width: 100%;
   min-height: 100vh;
-  background-color: #F5F5F5;
+  background-color: #FAFAFA;
   display: flex;
   flex-direction: column;
 `;
@@ -11,7 +11,7 @@ export const Container = styled.div`
 export const Header = styled.div`
   width: 100%;
   padding: 32px 40px;
-  background-color: #F8F8F8;
+  background-color: #FAFAFA;
   border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 `;
@@ -40,11 +40,12 @@ export const LocationInfo = styled.div`
 `;
 
 export const LocationDot = styled.div`
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background-color: #00C853;
-  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.2);
+  background-color: #2196F3;
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.3);
+  border: 2px solid #FFFFFF;
 `;
 
 export const HeaderControls = styled.div`
@@ -58,7 +59,7 @@ export const SearchInput = styled.input`
   flex: 1;
   height: 48px;
   padding: 0 20px;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   font-size: 16px;
   background-color: #FFFFFF;
@@ -72,8 +73,8 @@ export const SearchInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #CD0B16;
-    box-shadow: 0 0 0 3px rgba(205, 11, 22, 0.1);
+    border-color: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -106,7 +107,7 @@ export const NearestRouteButton = styled.button`
   padding: 0 24px;
   background-color: #FFFFFF;
   color: #CD0B16;
-  border: 2px solid #CD0B16;
+  border: 2px solid rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -157,7 +158,7 @@ export const MapArea = styled.div`
   flex: 2;
   background-color: #F5F5F5;
   position: relative;
-  border-right: 2px solid #FFE5E5;
+  border-right: 2px solid rgba(0, 0, 0, 0.15);
 `;
 
 export const MapPlaceholder = styled.div`
@@ -166,17 +167,17 @@ export const MapPlaceholder = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FFF5F5 0%, #FFE5E5 100%);
+  background: #E0E0E0;
 `;
 
 export const MapInstruction = styled.p`
-  color: #999999;
+  color: #666666;
   font-size: 16px;
   text-align: center;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: #F5F5F5;
   border-radius: 8px;
-  border: 2px dashed #FFCCCC;
+  border: 2px dashed #CCCCCC;
 `;
 
 export const InfoPanel = styled.div`
@@ -208,7 +209,7 @@ export const SortSelect = styled.select`
   width: 100%;
   height: 40px;
   padding: 0 16px;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   font-size: 14px;
   background-color: #FFFFFF;
@@ -218,8 +219,8 @@ export const SortSelect = styled.select`
 
   &:focus {
     outline: none;
-    border-color: #CD0B16;
-    box-shadow: 0 0 0 3px rgba(205, 11, 22, 0.1);
+    border-color: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -230,7 +231,7 @@ export const StatusLegend = styled.div`
   padding: 16px;
   background-color: #FFF9F9;
   border-radius: 8px;
-  border: 1px solid #FFE5E5;
+  border: 1px solid rgba(0, 0, 0, 0.15);
   flex-wrap: wrap;
 `;
 
@@ -244,12 +245,12 @@ export const EmergencyRoomList = styled.div`
 export const EmergencyRoomCard = styled.div`
   padding: 20px;
   background-color: #FFFFFF;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #CD0B16;
+    border-color: rgba(0, 0, 0, 0.3);
     box-shadow: 0 4px 12px rgba(205, 11, 22, 0.15);
     transform: translateY(-2px);
   }
@@ -320,7 +321,7 @@ export const RoomSpecialties = styled.div`
 export const SpecialtyTag = styled.span`
   padding: 4px 12px;
   background-color: #FFF5F5;
-  border: 1px solid #FFE5E5;
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 16px;
   font-size: 12px;
   color: #CD0B16;
@@ -355,7 +356,7 @@ export const HelpButton = styled.button`
   height: 48px;
   background-color: #FFFFFF;
   color: #CD0B16;
-  border: 2px solid #CD0B16;
+  border: 2px solid rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   font-size: 15px;
   font-weight: 600;

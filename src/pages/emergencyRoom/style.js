@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Container = styled.div`
   width: 100%;
   min-height: 100vh;
-  background-color: #F5F5F5;
+  background-color: #FAFAFA;
   display: flex;
   flex-direction: column;
 `;
@@ -11,7 +11,7 @@ export const Container = styled.div`
 export const Header = styled.div`
   width: 100%;
   padding: 24px 20px;
-  background-color: #F8F8F8;
+  background-color: #FAFAFA;
   border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 `;
@@ -53,7 +53,7 @@ export const StatusSection = styled.div`
   padding: 20px;
   background-color: #FFF9F9;
   border-radius: 12px;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
 `;
 
 export const StatusBadge = styled.div`
@@ -118,7 +118,7 @@ export const SectionTitle = styled.h2`
   color: #CD0B16;
   margin: 0 0 16px 0;
   padding-bottom: 12px;
-  border-bottom: 2px solid #FFE5E5;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
 `;
 
 export const InfoItem = styled.div`
@@ -159,7 +159,7 @@ export const SpecialtyList = styled.div`
 export const SpecialtyTag = styled.span`
   padding: 8px 16px;
   background-color: #FFF5F5;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   border-radius: 20px;
   font-size: 14px;
   color: #CD0B16;
@@ -175,7 +175,7 @@ export const DepartmentList = styled.div`
 export const DepartmentTag = styled.span`
   padding: 8px 16px;
   background-color: #F5F5F5;
-  border: 1px solid #E0E0E0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 20px;
   font-size: 14px;
   color: #666666;
@@ -191,7 +191,7 @@ export const FacilityList = styled.div`
 export const FacilityTag = styled.span`
   padding: 8px 16px;
   background-color: #E3F2FD;
-  border: 1px solid #BBDEFB;
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 20px;
   font-size: 14px;
   color: #1976D2;
@@ -204,7 +204,7 @@ export const ActionButtons = styled.div`
   left: 0;
   right: 0;
   padding: 20px;
-  background-color: #F8F8F8;
+  background-color: #FAFAFA;
   border-top: 2px solid rgba(0, 0, 0, 0.05);
   display: flex;
   gap: 12px;
@@ -240,7 +240,7 @@ export const SecondaryButton = styled.button`
   height: 56px;
   background-color: #FFFFFF;
   color: #CD0B16;
-  border: 2px solid #CD0B16;
+  border: 2px solid rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   font-size: 18px;
   font-weight: 700;

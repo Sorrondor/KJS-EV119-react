@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 배경 -->
+  <rect width="64" height="64" fill="#CD0B16" rx="10"/>
+  
+  <!-- 십자가 아이콘 (중심 정렬, 온전한 십자 모양) -->
+  <!-- 세로 막대 -->
+  <rect x="26" y="14" width="12" height="36" fill="white" rx="2"/>
+  <!-- 가로 막대 -->
+  <rect x="14" y="26" width="36" height="12" fill="white" rx="2"/>
+</svg>

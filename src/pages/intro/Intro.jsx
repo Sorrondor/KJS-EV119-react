@@ -31,7 +31,7 @@ const Intro = () => {
   return (
     <S.Container>
       <S.Header>
-        <S.Logo>ER</S.Logo>
+        <S.Logo>EV119</S.Logo>
         <S.Subtitle>응급실 정보 서비스</S.Subtitle>
       </S.Header>
 

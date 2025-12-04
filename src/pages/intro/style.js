@@ -4,7 +4,7 @@ import { flexCenter, flexCenterColumn } from '../../styles/common';
 export const Container = styled.div`
   width: 100%;
   min-height: 100vh;
-  background-color: #F5F5F5;
+  background-color: #FAFAFA;
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -16,7 +16,7 @@ export const Container = styled.div`
 export const Header = styled.header`
   padding: 60px 24px 40px;
   text-align: center;
-  background-color: #F8F8F8;
+  background-color: #FAFAFA;
   backdrop-filter: blur(10px);
 `;
 
@@ -163,7 +163,7 @@ export const SearchInput = styled.input`
   height: 56px;
   background-color: #FFFFFF;
   color: #333333;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   padding: 0 20px;
   font-size: 16px;
@@ -178,8 +178,8 @@ export const SearchInput = styled.input`
   }
 
   &:focus {
-    border-color: #CD0B16;
-    box-shadow: 0 0 0 4px rgba(205, 11, 22, 0.1);
+    border-color: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
     background-color: #FFF9F9;
   }
 `;
@@ -197,7 +197,7 @@ export const QuickLinkItem = styled.button`
   min-width: 140px;
   height: 56px;
   background-color: #FFFFFF;
-  border: 2px solid #FFE5E5;
+  border: 2px solid rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   padding: 0 16px;
   display: flex;
@@ -209,7 +209,7 @@ export const QuickLinkItem = styled.button`
   box-shadow: 0 2px 8px rgba(205, 11, 22, 0.05);
 
   &:hover {
-    border-color: #CD0B16;
+    border-color: rgba(0, 0, 0, 0.3);
     background-color: #FFF5F5;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(205, 11, 22, 0.15);
@@ -237,7 +237,7 @@ export const LinkText = styled.span`
 export const Footer = styled.footer`
   padding: 24px;
   text-align: center;
-  background-color: #F8F8F8;
+  background-color: #FAFAFA;
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 `;

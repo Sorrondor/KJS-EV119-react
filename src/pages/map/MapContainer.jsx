@@ -94,7 +94,7 @@ const MapContainer = () => {
   return (
     <S.Container>
       <S.Header>
-        <S.Title>ER 주변 응급실 한눈에 보기</S.Title>
+        <S.Title>주변 응급실 한눈에 보기</S.Title>
         <S.Description>
           사용자의 현재 위치를 기준으로 응급실 위치와 상태를 실시간으로 정렬해서 보여주는 화면입니다.
         </S.Description>
