@@ -30,63 +30,82 @@ const Login = () => {
     window.location.href = `${BACKEND_URL}/oauth2/authorization/naver`;
   }
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      setError('이메일과 비밀번호를 입력해주세요.');
+  if (!formData.email || !formData.password) {
+    setError('이메일과 비밀번호를 입력해주세요.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/member/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        memberEmail: formData.email,
+        memberPassword: formData.password,
+      }),
+    });
+
+    let result = null;
+    try {
+      result = await response.json();
+    } catch {
+      result = null;
+    }
+
+    if (response.status === 400) {
+      setError(result?.message || '입력하신 정보를 다시 확인해주세요.');
       return;
     }
 
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/member/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-       
-        credentials: 'include',
-        body: JSON.stringify({
-      
-          memberEmail: formData.email,
-          memberPassword: formData.password,
-        }),
-      });
-
-      let result = null;
-      try {
-        result = await response.json();
-      } catch {
-        result = null;
-      }
-
-      if(response.status === 400) {
-        setError(result?.message || '입력하신 정보를 다시 확인해주세요.');
-      }
-
-      if(response.status === 401) {
-        setError(result?.message || '토큰이 없거나 인증에 실패했습니다.');
-      }
-
-      if(!response.ok) {
-        setError(result?.message || '서버 오류가 발생했습니다.');
-      }  
-  
-      const accessToken = result.data?.accessToken;
-
-      if (!accessToken) {
-        throw new Error('입력하신 정보를 다시 확인해주세요.');
-      }
-
-     
-      localStorage.setItem('accessToken', accessToken);
-
-      
-      navigate('/main/mypage');
-    } catch (error) {
-      console.error(error);
-      setError(error.message || '로그인에 실패했습니다.');
+    if (response.status === 401) {
+      setError(result?.message || '토큰이 없거나 인증에 실패했습니다.');
+      return;
     }
-  };
+
+    if (!response.ok) {
+      setError(result?.message || '서버 오류가 발생했습니다.');
+      return;
+    }
+
+    
+    console.log('result:', result);
+    console.log('result.data:', result?.data);
+
+    const data = result.data;
+    const accessToken = data?.accessToken;
+
+    if (!accessToken) {
+      throw new Error('입력하신 정보를 다시 확인해주세요.');
+    }
+
+    
+    localStorage.setItem('accessToken', accessToken);
+
+    
+    localStorage.setItem('isLoggedIn', 'true');
+
+    
+    const member = {
+      memberId: data?.memberId ?? null,
+      memberName: data?.memberName ?? null,   
+      memberEmail: data?.memberEmail ?? formData.email,
+    };
+
+    console.log('👤 member to save:', member);
+    localStorage.setItem('member', JSON.stringify(member));
+
+    navigate('/main/mypage');
+  } catch (error) {
+    console.error(error);
+    setError(error.message || '로그인에 실패했습니다.');
+  }
+};
+
 
   return (
     <S.Container>

@@ -81,7 +81,7 @@ const SignUp = () => {
       memberName: formData.name,
       memberEmail: formData.email,
       memberPassword: formData.password,
-      memberMobNo: formData.phone
+      memberPhone: formData.phone
     };
 
     try {
