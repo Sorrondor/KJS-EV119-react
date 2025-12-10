@@ -7,34 +7,50 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:10000
 const UserHeader = () => {
   const navigate = useNavigate();
   const menuRef = useRef(null);
-  // 임시 로그인 상태 (실제로는 Redux나 Context에서 가져옴)
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [userData, setUserData] = useState(null);
-  
+
+
   useEffect(() => {
-  const storedLogin = localStorage.getItem("isLoggedIn");
-  const storedUser = localStorage.getItem("member");
+  let stored = localStorage.getItem('currentMember');
 
-  console.log("storedLogin", storedLogin);
-  console.log("storedUser", storedUser);
-
-  if (storedLogin === "true" && storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser);
-      console.log("user parsed:", parsed);
-
-      if (parsed && Object.keys(parsed).length > 0) {
-        setIsLoggedIn(true);
-        setUserData(parsed);
-      } else {
-        console.warn("member is empty object, ignoring");
-      }
-    } catch (e) {
-      console.error("failed to parse member", e);
+  if (!stored) {
+    const legacy = localStorage.getItem('member');
+    if (legacy) {
+      console.log('fallback to legacy member:', legacy);
+      stored = legacy;
     }
   }
+
+  console.log('stored currentMember/legacy:', stored);
+
+  if (!stored) {
+    setIsLoggedIn(false);
+    setUserData(null);
+    return;
+  }
+
+  try {
+    const parsed = JSON.parse(stored);
+    console.log('parsed current user:', parsed);
+
+    if (parsed && Object.keys(parsed).length > 0) {
+      setIsLoggedIn(true);
+      setUserData(parsed);
+    } else {
+      console.warn('parsed user is empty, ignoring');
+      setIsLoggedIn(false);
+      setUserData(null);
+    }
+  } catch (e) {
+    console.error('failed to parse stored user', e);
+    setIsLoggedIn(false);
+    setUserData(null);
+  }
 }, []);
+
 
   const handleLogin = () => {
     navigate('/auth/login');
@@ -44,39 +60,39 @@ const UserHeader = () => {
     navigate('/main/mypage');
     setShowMenu(false);
   };
-  
 
   const handleLogout = async () => {
-  if (!window.confirm('로그아웃 하시겠습니까?')) return;
+    if (!window.confirm('로그아웃 하시겠습니까?')) return;
 
-  const accessToken = localStorage.getItem('accessToken'); 
+    const accessToken = localStorage.getItem('accessToken');
 
-  try {
-    await fetch(`${BACKEND_URL}/api/member/logout`, {
-      method: "DELETE", 
-      headers: {
-        ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-  } catch (e) {
-    console.error('logout api error', e);
-  } finally {
-    
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('member');
-    localStorage.setItem('isLoggedIn', 'false');
+    try {
+      await fetch(`${BACKEND_URL}/api/member/logout`, {
+        method: 'DELETE',
+        headers: {
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+    } catch (e) {
+      console.error('logout api error', e);
+    } finally {
+     
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('currentMember');
 
-    setIsLoggedIn(false);
-    setUserData(null);
-    setShowMenu(false);
+     
+      localStorage.removeItem('member');
+      localStorage.removeItem('isLoggedIn');
 
-    navigate('/');
-  }
-};
+      setIsLoggedIn(false);
+      setUserData(null);
+      setShowMenu(false);
 
-
+      navigate('/');
+    }
+  };
 
   // 외부 클릭 시 메뉴 닫기
   useEffect(() => {
@@ -98,9 +114,7 @@ const UserHeader = () => {
   return (
     <S.HeaderContainer ref={menuRef}>
       {!isLoggedIn ? (
-        <S.LoginButton onClick={handleLogin}>
-          로그인
-        </S.LoginButton>
+        <S.LoginButton onClick={handleLogin}>로그인</S.LoginButton>
       ) : (
         <S.ProfileContainer>
           <S.ProfileButton onClick={() => setShowMenu(!showMenu)}>
@@ -114,7 +128,12 @@ const UserHeader = () => {
                 <S.MenuIcon>👤</S.MenuIcon>
                 마이페이지
               </S.MenuItem>
-              <S.MenuItem onClick={() => { navigate('/main/profile'); setShowMenu(false); }}>
+              <S.MenuItem
+                onClick={() => {
+                  navigate('/main/profile');
+                  setShowMenu(false);
+                }}
+              >
                 <S.MenuIcon>📝</S.MenuIcon>
                 회원정보 수정
               </S.MenuItem>
@@ -132,4 +151,3 @@ const UserHeader = () => {
 };
 
 export default UserHeader;
-

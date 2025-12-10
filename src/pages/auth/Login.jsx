@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import * as S from './style';
+import { Provider } from 'react-redux';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:10000';
 
@@ -86,6 +87,17 @@ const Login = () => {
     
     localStorage.setItem('accessToken', accessToken);
 
+    const currentMember = {
+      memberId: data?.memberId ?? null,
+      memberName: data?.memberName ?? null,
+      memberEmail: data?.memberEmail ?? formData.email,
+      Provider : 'LOCAL',
+    };
+
+    console.log(currentMember);
+
+
+
     
     localStorage.setItem('isLoggedIn', 'true');
 
@@ -97,7 +109,14 @@ const Login = () => {
     };
 
     console.log('👤 member to save:', member);
-    localStorage.setItem('member', JSON.stringify(member));
+    localStorage.setItem('currentMember', JSON.stringify(currentMember));
+
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('member', JSON.stringify({
+      memberId: currentMember.memberId,
+      memberName: currentMember.memberName,
+      memberEmail: currentMember.memberEmail,
+    }));
 
     navigate('/main/mypage');
   } catch (error) {
