@@ -10,6 +10,7 @@ import MyPage from "../pages/mypage/MyPage";
 import Profile from "../pages/mypage/Profile";
 import HealthInfo from "../pages/mypage/HealthInfo";
 import VisitHistory from "../pages/mypage/VisitHistory";
+import SocialRedirect from "../pages/auth/SocialRedirect";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "/auth/signup",
     element: <SignUp />
+  },
+  {
+    path: "/auth/oauth2/redirect",
+    element: <SocialRedirect />
   },
   {
     path: "/main/map",

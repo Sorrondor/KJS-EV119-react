@@ -13,17 +13,26 @@ const SignUp = () => {
   });
   const [errors, setErrors] = useState({});
 
+  const BACKEND_URL =
+    process.env.REACT_APP_BACKEND_URL || 'http://localhost:10000';
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    // 에러 초기화
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
+      }));
+    }
+    if (errors.form) {
+      setErrors(prev => ({
+        ...prev,
+        form: ''
       }));
     }
   };
@@ -61,19 +70,54 @@ const SignUp = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validate()) {
       return;
     }
 
-    // 회원가입 로직 (실제로는 API 호출)
-    console.log('회원가입 시도:', formData);
-    
-    // 임시 회원가입 성공 처리
-    alert('회원가입이 완료되었습니다.');
-    navigate('/auth/login');
+    const payload = {
+      memberName: formData.name,
+      memberEmail: formData.email,
+      memberPassword: formData.password,
+      memberMobNo: formData.phone
+    };
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/member/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message =
+          (result && result.message) || '회원가입에 실패했습니다.';
+        setErrors(prev => ({
+          ...prev,
+          form: message
+        }));
+        return;
+      }
+
+ 
+      const message =
+        (result && result.message) || '회원가입이 완료되었습니다.';
+      alert(message);
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('회원가입 요청 중 오류:', error);
+      setErrors(prev => ({
+        ...prev,
+        form: '서버와 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+      }));
+    }
   };
 
   return (
@@ -87,6 +131,9 @@ const SignUp = () => {
         <S.FormCard>
           <S.FormTitle>회원가입</S.FormTitle>
           <S.FormSubtitle>정보를 입력하여 계정을 만드세요</S.FormSubtitle>
+
+          
+          {errors.form && <S.FieldError>{errors.form}</S.FieldError>}
 
           <S.Form onSubmit={handleSubmit}>
             <S.InputGroup>
@@ -138,7 +185,9 @@ const SignUp = () => {
                 placeholder="비밀번호를 다시 입력하세요"
                 required
               />
-              {errors.confirmPassword && <S.FieldError>{errors.confirmPassword}</S.FieldError>}
+              {errors.confirmPassword && (
+                <S.FieldError>{errors.confirmPassword}</S.FieldError>
+              )}
             </S.InputGroup>
 
             <S.InputGroup>
@@ -158,7 +207,8 @@ const SignUp = () => {
 
             <S.LinkContainer>
               <S.LinkText>
-                이미 계정이 있으신가요? <S.StyledLink to="/auth/login">로그인</S.StyledLink>
+                이미 계정이 있으신가요?{' '}
+                <S.StyledLink to="/auth/login">로그인</S.StyledLink>
               </S.LinkText>
             </S.LinkContainer>
           </S.Form>
@@ -169,4 +219,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-

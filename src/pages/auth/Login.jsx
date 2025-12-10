@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import * as S from './style';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:10000';
+
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -19,20 +21,71 @@ const Login = () => {
     setError('');
   };
 
-  const handleSubmit = (e) => {
+ 
+  const handleKakaoLogin =() => {
+    window.location.href = `${BACKEND_URL}/oauth2/authorization/kakao`;
+  };
+
+  const handleNaverLogin = () => {
+    window.location.href = `${BACKEND_URL}/oauth2/authorization/naver`;
+  }
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
       setError('이메일과 비밀번호를 입력해주세요.');
       return;
     }
 
-    // 로그인 로직 (실제로는 API 호출)
-    console.log('로그인 시도:', formData);
-    
-    // 임시 로그인 성공 처리
-    // 실제로는 API 응답에 따라 처리
-    navigate('/main/mypage');
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/member/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+       
+        credentials: 'include',
+        body: JSON.stringify({
+      
+          memberEmail: formData.email,
+          memberPassword: formData.password,
+        }),
+      });
+
+      let result = null;
+      try {
+        result = await response.json();
+      } catch {
+        result = null;
+      }
+
+      if(response.status === 400) {
+        setError(result?.message || '입력하신 정보를 다시 확인해주세요.');
+      }
+
+      if(response.status === 401) {
+        setError(result?.message || '토큰이 없거나 인증에 실패했습니다.');
+      }
+
+      if(!response.ok) {
+        setError(result?.message || '서버 오류가 발생했습니다.');
+      }  
+  
+      const accessToken = result.data?.accessToken;
+
+      if (!accessToken) {
+        throw new Error('입력하신 정보를 다시 확인해주세요.');
+      }
+
+     
+      localStorage.setItem('accessToken', accessToken);
+
+      
+      navigate('/main/mypage');
+    } catch (error) {
+      console.error(error);
+      setError(error.message || '로그인에 실패했습니다.');
+    }
   };
 
   return (
@@ -83,11 +136,11 @@ const Login = () => {
             </S.Divider>
 
             <S.SocialButtons>
-              <S.SocialButton type="button" $variant="kakao">
+              <S.SocialButton type="button" $variant="kakao" onClick={handleKakaoLogin}>
                 <S.SocialIcon>💬</S.SocialIcon>
                 카카오 로그인
               </S.SocialButton>
-              <S.SocialButton type="button" $variant="naver">
+              <S.SocialButton type="button" $variant="naver" onClick={handleNaverLogin}>
                 <S.SocialIcon>N</S.SocialIcon>
                 네이버 로그인
               </S.SocialButton>
@@ -106,4 +159,3 @@ const Login = () => {
 };
 
 export default Login;
-
