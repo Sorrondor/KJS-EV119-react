@@ -160,12 +160,49 @@ const Intro = () => {
   ];
 
   const handleAmbulanceCall = () => {
-    // 전화 걸기
+    const ok =window.confirm(
+      '119로 연결됩니다. \n실제 응급 상황일 때만 이용해주세요.\n허위 신고시 처벌받을 수 있습니다.'
+    );
+
+    if(!ok) {
+      return;
+    }
+
     window.location.href = 'tel:119';
-    // 전화가 걸렸다는 알림
+    
     setTimeout(() => {
       alert('119에 신고되었습니다.\n구급차가 출동합니다.');
-    }, 500);
+    }, 300);
+  };
+
+  const handleSms119 = () => {
+    const ok = window.confirm(
+      '119 문자 신고 화면으로 이동합됩니다. \n실제 응급 상황일 때만 이용해주세요.\n허위 신고시 처벌받을 수 있습니다.'
+    );
+
+    if(!ok) {
+      return;
+    }
+
+    if (!/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+      alert('문자 신고는 휴대폰에서만 사용할 수 있습니다.');
+      return;
+    }
+
+    const body = encodeURIComponent(
+      [
+        '119 문자 신고입니다.',
+        '이름: ',
+        '현재 위치: ',
+        '상황(화재/교통사고/질병 등): ',
+        '환자 수: ',
+        '의식 여부(있음/없음): ',
+        '호흡 여부(정상/곤란/없음): ',
+      ].join('\n')
+    );
+
+    window.location.href = `sms:119?body=${body}`;
+
   };
 
   const handleEmergencyRoomInfo = () => {
