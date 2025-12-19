@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import * as S from './style';
+
+const BACKEND_URL =
+  process.env.REACT_APP_BACKEND_URL || 'http://localhost:10000';
+
+const normalizePhone = (phone) => phone.replace(/[^\d]/g, '');
 
 const SignUp = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -11,27 +17,21 @@ const SignUp = () => {
     confirmPassword: '',
     phone: ''
   });
-  const [errors, setErrors] = useState({});
 
-  const BACKEND_URL =
-    process.env.REACT_APP_BACKEND_URL || 'http://localhost:10000';
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
 
-    if (errors[name]) {
+    if (errors[name] || errors.form) {
       setErrors(prev => ({
         ...prev,
-        [name]: ''
-      }));
-    }
-    if (errors.form) {
-      setErrors(prev => ({
-        ...prev,
+        [name]: '',
         form: ''
       }));
     }
@@ -62,9 +62,10 @@ const SignUp = () => {
 
     if (!formData.phone.trim()) {
       newErrors.phone = '전화번호를 입력해주세요.';
-    } else if (!/^010-\d{4}-\d{4}$/.test(formData.phone)) {
-      newErrors.phone = '올바른 전화번호 형식이 아닙니다. (010-0000-0000)';
+    } else if (!/^010\d{8}$/.test(formData.phone)) {
+      newErrors.phone = '올바른 전화번호 형식이 아닙니다. (010xxxxxxxx)';
     }
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -73,15 +74,13 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
     const payload = {
       memberName: formData.name,
       memberEmail: formData.email,
       memberPassword: formData.password,
-      memberPhone: formData.phone
+      memberPhone: normalizePhone(formData.phone)
     };
 
     try {
@@ -97,19 +96,14 @@ const SignUp = () => {
       const result = await response.json().catch(() => null);
 
       if (!response.ok) {
-        const message =
-          (result && result.message) || '회원가입에 실패했습니다.';
         setErrors(prev => ({
           ...prev,
-          form: message
+          form: result?.message || '회원가입에 실패했습니다.'
         }));
         return;
       }
 
- 
-      const message =
-        (result && result.message) || '회원가입이 완료되었습니다.';
-      alert(message);
+      alert(result?.message || '회원가입이 완료되었습니다.');
       navigate('/auth/login');
     } catch (error) {
       console.error('회원가입 요청 중 오류:', error);
@@ -132,7 +126,6 @@ const SignUp = () => {
           <S.FormTitle>회원가입</S.FormTitle>
           <S.FormSubtitle>정보를 입력하여 계정을 만드세요</S.FormSubtitle>
 
-          
           {errors.form && <S.FieldError>{errors.form}</S.FieldError>}
 
           <S.Form onSubmit={handleSubmit}>
@@ -197,7 +190,7 @@ const SignUp = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="010-0000-0000"
+                placeholder="01012345678"
                 required
               />
               {errors.phone && <S.FieldError>{errors.phone}</S.FieldError>}
