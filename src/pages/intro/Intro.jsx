@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserHeader from '../../components/header/UserHeader';
 import * as S from './style';
@@ -10,6 +10,9 @@ const Intro = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const recognitionRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [debouncedTerm, setDebouncedTerm] = useState('');
+  const [firstAidResult, setFirstAidResult] = useState({})
 
   // 환자 상태별 응급조치 데이터
   const emergencyProcedures = [
@@ -159,28 +162,33 @@ const Intro = () => {
     }
   ];
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedTerm(searchTerm), 400); // 0.4초 정지 후 확정
+    return () => clearTimeout(timer); // 이전 타이머 취소
+  }, [searchTerm]);
+
   const handleAmbulanceCall = () => {
-    const ok =window.confirm(
+    const ok = window.confirm(
       '119로 연결됩니다. \n실제 응급 상황일 때만 이용해주세요.\n허위 신고시 처벌받을 수 있습니다.'
     );
 
-    if(!ok) {
+    if (!ok) {
       return;
     }
 
     window.location.href = 'tel:119';
-    
+
     setTimeout(() => {
       alert('119에 신고되었습니다.\n구급차가 출동합니다.');
-    }, 300);
+    }, 500);
   };
 
   const handleSms119 = () => {
     const ok = window.confirm(
-      '119 문자 신고 화면으로 이동합됩니다. \n실제 응급 상황일 때만 이용해주세요.\n허위 신고시 처벌받을 수 있습니다.'
+      '119 문자 신고 화면으로 이동합니다. \n실제 응급 상황일 때만 이용해주세요.\n허위 신고시 처벌받을 수 있습니다.'
     );
 
-    if(!ok) {
+    if (!ok) {
       return;
     }
 
@@ -197,12 +205,11 @@ const Intro = () => {
         '상황(화재/교통사고/질병 등): ',
         '환자 수: ',
         '의식 여부(있음/없음): ',
-        '호흡 여부(정상/곤란/없음): ',
+        '호흡 여부(정상/곤란/없음): '
       ].join('\n')
     );
 
     window.location.href = `sms:119?body=${body}`;
-
   };
 
   const handleEmergencyRoomInfo = () => {
@@ -231,8 +238,56 @@ const Intro = () => {
     setShowResults(matched.length > 0);
   };
 
+  const searchEmergencyProceduresFetch = async (term) => {
+    if (!term.trim()) {
+      setFirstAidResult({});
+      setSearchResults([]);
+      setShowResults(false);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setFirstAidResult({
+      firstAidKeywords: ['']
+    });
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/first-aid/load-aid?message=${encodeURIComponent(
+          term.toLowerCase()
+        )}`,
+        {
+          method: 'GET'
+        }
+      );
+
+      const jsonData = await response.json();
+      setFirstAidResult(jsonData.data || { firstAidProcedures: [] });
+    } catch (error) {
+      console.error('first aid fetch error', error);
+      setFirstAidResult({ firstAidProcedures: [] });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!debouncedTerm.trim()) {
+      setSearchResults([]);
+      setShowResults(false);
+      setFirstAidResult({});
+      setIsLoading(false);
+      return;
+    }
+
+    console.log(`요청 ${debouncedTerm}`); // 이 자리에서 서버 fetch 실행
+    searchEmergencyProceduresFetch(debouncedTerm);
+  }, [debouncedTerm]);
+
   const handleSearchChange = (e) => {
     const value = e.target.value;
+    setIsLoading(false)
     setSearchTerm(value);
     searchEmergencyProcedures(value);
   };
@@ -321,6 +376,23 @@ const Intro = () => {
     }
   };
 
+  const hasFirstAidProcedures =
+    Array.isArray(firstAidResult?.firstAidProcedures) &&
+    firstAidResult.firstAidProcedures.length > 0;
+
+  const hasLocalResults = showResults && searchResults.length > 0;
+  const isDisplay = Boolean(searchTerm?.trim()) && hasFirstAidProcedures;
+  const isSearching =
+    Boolean(searchTerm?.trim()) && isLoading && !hasFirstAidProcedures;
+  const showLocalResults = !isDisplay && hasLocalResults;
+  const showInvalid =
+    Boolean(searchTerm?.trim()) &&
+    !isLoading &&
+    !hasFirstAidProcedures &&
+    !hasLocalResults &&
+    Array.isArray(firstAidResult?.firstAidProcedures) &&
+    firstAidResult.firstAidProcedures.length === 0;
+
   return (
     <S.Container>
       <UserHeader />
@@ -377,7 +449,42 @@ const Intro = () => {
           {isListening && (
             <S.ListeningIndicator>음성인식 중...</S.ListeningIndicator>
           )}
-          {showResults && searchResults.length > 0 && (
+          {isDisplay && (
+            <>
+              <S.SearchResults>
+                <S.ResultCard $urgency={firstAidResult?.urgency}>
+                  <S.ResultHeader>
+                    <S.ResultSymptom>
+                      {firstAidResult?.firstAidKeywords?.[0]}
+                    </S.ResultSymptom>
+                    <S.UrgencyBadge $urgency={firstAidResult?.urgency}>
+                      {firstAidResult?.urgency === 'CRITICAL'
+                        ? '긴급'
+                        : firstAidResult?.urgency === 'HIGH'
+                        ? '높음'
+                        : '보통'}
+                    </S.UrgencyBadge>
+                  </S.ResultHeader>
+                  <S.ProceduresList>
+                    {firstAidResult?.firstAidProcedures?.map((procedure, idx) => (
+                      <S.ProcedureItem key={idx}>
+                        <S.ProcedureNumber>{idx + 1}</S.ProcedureNumber>
+                        <S.ProcedureText>{procedure}</S.ProcedureText>
+                      </S.ProcedureItem>
+                    ))}
+                  </S.ProceduresList>
+                </S.ResultCard>
+              </S.SearchResults>
+              <S.EmergencyRouteButton onClick={handleNearestRoute}>
+                <S.RouteIcon>🧭</S.RouteIcon>
+                <S.RouteText>
+                  <S.RouteTitle>가장 가까운 응급실로 길찾기</S.RouteTitle>
+                  <S.RouteSubtitle>네비게이션 시작</S.RouteSubtitle>
+                </S.RouteText>
+              </S.EmergencyRouteButton>
+            </>
+          )}
+          {showLocalResults && (
             <>
               <S.SearchResults>
                 {searchResults.map((result, index) => (
@@ -385,8 +492,11 @@ const Intro = () => {
                     <S.ResultHeader>
                       <S.ResultSymptom>{result.symptom}</S.ResultSymptom>
                       <S.UrgencyBadge $urgency={result.urgency}>
-                        {result.urgency === 'critical' ? '긴급' : 
-                         result.urgency === 'high' ? '높음' : '보통'}
+                        {result.urgency === 'critical'
+                          ? '긴급'
+                          : result.urgency === 'high'
+                          ? '높음'
+                          : '보통'}
                       </S.UrgencyBadge>
                     </S.ResultHeader>
                     <S.ProceduresList>
@@ -409,9 +519,14 @@ const Intro = () => {
               </S.EmergencyRouteButton>
             </>
           )}
-          {showResults && searchResults.length === 0 && searchTerm.trim() && (
+          {isSearching && (
             <S.NoResults>
-              검색 결과가 없습니다. 다른 키워드로 검색해보세요.
+              현재 검색 중입니다. 잠시만 기다려주십시오.
+            </S.NoResults>
+          )}
+          {showInvalid && (
+            <S.NoResults>
+              올바르지않은 검색어입니다. 다시 시도해주세요.
             </S.NoResults>
           )}
         </S.SearchSection>
@@ -426,4 +541,3 @@ const Intro = () => {
 };
 
 export default Intro;
-
