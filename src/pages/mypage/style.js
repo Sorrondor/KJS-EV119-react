@@ -1,10 +1,10 @@
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 export const Container = styled.div`
   width: 100%;
   min-height: 100vh;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   display: flex;
   flex-direction: column;
 `;
@@ -12,7 +12,7 @@ export const Container = styled.div`
 export const Header = styled.div`
   width: 100%;
   padding: 24px 20px;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 `;
@@ -21,7 +21,7 @@ export const BackButton = styled.button`
   background: none;
   border: none;
   font-size: 18px;
-  color: #CD0B16;
+  color: #cd0b16;
   cursor: pointer;
   padding: 8px 0;
   margin-bottom: 12px;
@@ -29,14 +29,14 @@ export const BackButton = styled.button`
   transition: color 0.3s ease;
 
   &:hover {
-    color: #B80F16;
+    color: #b80f16;
   }
 `;
 
 export const Title = styled.h1`
   font-size: 28px;
   font-weight: 700;
-  color: #CD0B16;
+  color: #cd0b16;
   margin: 0;
 `;
 
@@ -50,7 +50,7 @@ export const Content = styled.div`
 `;
 
 export const ProfileSection = styled.div`
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 32px 24px;
   text-align: center;
@@ -63,7 +63,7 @@ export const ProfileImage = styled.div`
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background-color: #F5F5F5;
+  background-color: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,8 +92,8 @@ export const EditButton = styled.button`
   top: 24px;
   right: 24px;
   padding: 8px 16px;
-  background-color: #FFFFFF;
-  color: #CD0B16;
+  background-color: #ffffff;
+  color: #cd0b16;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   font-size: 14px;
@@ -102,8 +102,8 @@ export const EditButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #FFF5F5;
-    border-color: #CD0B16;
+    background-color: #fff5f5;
+    border-color: #cd0b16;
   }
 `;
 
@@ -120,7 +120,7 @@ export const MenuTitle = styled.h3`
 `;
 
 export const MenuList = styled.div`
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -139,11 +139,11 @@ export const MenuItem = styled.div`
   }
 
   &:hover {
-    background-color: #FAFAFA;
+    background-color: #fafafa;
   }
 
   &:active {
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
   }
 `;
 
@@ -169,8 +169,8 @@ export const MenuArrow = styled.div`
 export const LogoutButton = styled.button`
   width: 100%;
   height: 52px;
-  background-color: #FFFFFF;
-  color: #CD0B16;
+  background-color: #ffffff;
+  color: #cd0b16;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 10px;
   font-size: 16px;
@@ -180,8 +180,8 @@ export const LogoutButton = styled.button`
   margin-top: 24px;
 
   &:hover {
-    background-color: #FFF5F5;
-    border-color: #CD0B16;
+    background-color: #fff5f5;
+    border-color: #cd0b16;
   }
 
   &:active {
@@ -190,7 +190,7 @@ export const LogoutButton = styled.button`
 `;
 
 export const FormSection = styled.div`
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -221,7 +221,7 @@ export const Input = styled.input`
   border-radius: 8px;
   font-size: 15px;
   color: #333333;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   box-sizing: border-box;
   transition: all 0.2s ease;
 
@@ -231,8 +231,8 @@ export const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #CD0B16;
-    background-color: #FAFAFA;
+    border-color: #cd0b16;
+    background-color: #fafafa;
   }
 `;
 
@@ -244,7 +244,7 @@ export const InfoValue = styled.div`
 
 export const FieldError = styled.div`
   font-size: 12px;
-  color: #CD0B16;
+  color: #cd0b16;
   margin-top: -4px;
 `;
 
@@ -257,7 +257,7 @@ export const ButtonGroup = styled.div`
 export const CancelButton = styled.button`
   flex: 1;
   height: 48px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   color: #666666;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
@@ -267,7 +267,7 @@ export const CancelButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #FAFAFA;
+    background-color: #fafafa;
     border-color: rgba(0, 0, 0, 0.2);
   }
 `;
@@ -275,8 +275,8 @@ export const CancelButton = styled.button`
 export const SaveButton = styled.button`
   flex: 1;
   height: 48px;
-  background: linear-gradient(135deg, #CD0B16 0%, #C30D16 50%, #B80F16 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, #cd0b16 0%, #c30d16 50%, #b80f16 100%);
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   font-size: 15px;
@@ -285,7 +285,7 @@ export const SaveButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: linear-gradient(135deg, #B80F16 0%, #B00D14 50%, #A50F14 100%);
+    background: linear-gradient(135deg, #b80f16 0%, #b00d14 50%, #a50f14 100%);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(195, 13, 22, 0.3);
   }
@@ -316,8 +316,9 @@ export const Tab = styled.button`
   flex: 1;
   min-width: 80px;
   padding: 12px 8px;
-  background-color: ${props => props.$active ? '#FFFFFF' : '#F5F5F5'};
-  border: 1px solid ${props => props.$active ? '#CD0B16' : 'rgba(0, 0, 0, 0.08)'};
+  background-color: ${(props) => (props.$active ? "#FFFFFF" : "#F5F5F5")};
+  border: 1px solid
+    ${(props) => (props.$active ? "#CD0B16" : "rgba(0, 0, 0, 0.08)")};
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -327,8 +328,9 @@ export const Tab = styled.button`
   gap: 4px;
 
   &:hover {
-    background-color: ${props => props.$active ? '#FFFFFF' : '#FAFAFA'};
-    border-color: ${props => props.$active ? '#CD0B16' : 'rgba(0, 0, 0, 0.15)'};
+    background-color: ${(props) => (props.$active ? "#FFFFFF" : "#FAFAFA")};
+    border-color: ${(props) =>
+      props.$active ? "#CD0B16" : "rgba(0, 0, 0, 0.15)"};
   }
 `;
 
@@ -338,12 +340,12 @@ export const TabIcon = styled.div`
 
 export const TabLabel = styled.span`
   font-size: 12px;
-  font-weight: ${props => props.$active ? '600' : '500'};
-  color: ${props => props.$active ? '#CD0B16' : '#666666'};
+  font-weight: ${(props) => (props.$active ? "600" : "500")};
+  color: ${(props) => (props.$active ? "#CD0B16" : "#666666")};
 `;
 
 export const HealthSection = styled.div`
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -364,15 +366,15 @@ export const Select = styled.select`
   border-radius: 8px;
   font-size: 15px;
   color: #333333;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   box-sizing: border-box;
   transition: all 0.2s ease;
   cursor: pointer;
 
   &:focus {
     outline: none;
-    border-color: #CD0B16;
-    background-color: #FAFAFA;
+    border-color: #cd0b16;
+    background-color: #fafafa;
   }
 `;
 
@@ -384,7 +386,7 @@ export const TagInput = styled.input`
   border-radius: 8px;
   font-size: 15px;
   color: #333333;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   box-sizing: border-box;
   transition: all 0.2s ease;
   margin-bottom: 8px;
@@ -395,8 +397,8 @@ export const TagInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #CD0B16;
-    background-color: #FAFAFA;
+    border-color: #cd0b16;
+    background-color: #fafafa;
   }
 `;
 
@@ -411,18 +413,18 @@ export const Tag = styled.span`
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background-color: #FFF5F5;
-  border: 1px solid #FFE5E5;
+  background-color: #fff5f5;
+  border: 1px solid #ffe5e5;
   border-radius: 16px;
   font-size: 13px;
-  color: #CD0B16;
+  color: #cd0b16;
   font-weight: 500;
 `;
 
 export const TagRemove = styled.button`
   background: none;
   border: none;
-  color: #CD0B16;
+  color: #cd0b16;
   font-size: 16px;
   cursor: pointer;
   padding: 0;
@@ -434,7 +436,7 @@ export const TagRemove = styled.button`
   justify-content: center;
 
   &:hover {
-    color: #B80F16;
+    color: #b80f16;
   }
 `;
 
@@ -446,7 +448,7 @@ export const MedicationSection = styled.div`
 
 export const MedicationCard = styled.div`
   padding: 16px;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
 `;
@@ -471,9 +473,9 @@ export const AllergySection = styled.div`
 
 export const AllergyCard = styled.div`
   padding: 16px;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-left: 3px solid #FF9800;
+  border-left: 3px solid #ff9800;
   border-radius: 8px;
 `;
 
@@ -497,9 +499,9 @@ export const EmergencySection = styled.div`
 
 export const EmergencyCard = styled.div`
   padding: 16px;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-left: 3px solid #CD0B16;
+  border-left: 3px solid #cd0b16;
   border-radius: 8px;
 `;
 
@@ -518,7 +520,7 @@ export const EmergencyRelation = styled.div`
 
 export const EmergencyPhone = styled.a`
   font-size: 15px;
-  color: #CD0B16;
+  color: #cd0b16;
   text-decoration: none;
   font-weight: 500;
 
@@ -530,8 +532,8 @@ export const EmergencyPhone = styled.a`
 export const AddButton = styled.button`
   width: 100%;
   height: 48px;
-  background-color: #FFFFFF;
-  color: #CD0B16;
+  background-color: #ffffff;
+  color: #cd0b16;
   border: 2px dashed rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   font-size: 14px;
@@ -541,16 +543,16 @@ export const AddButton = styled.button`
   margin-top: 8px;
 
   &:hover {
-    border-color: #CD0B16;
-    background-color: #FFF5F5;
+    border-color: #cd0b16;
+    background-color: #fff5f5;
   }
 `;
 
 export const RemoveButton = styled.button`
   width: 100%;
   height: 40px;
-  background-color: #FFFFFF;
-  color: #CD0B16;
+  background-color: #ffffff;
+  color: #cd0b16;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   font-size: 13px;
@@ -560,8 +562,8 @@ export const RemoveButton = styled.button`
   margin-top: 12px;
 
   &:hover {
-    background-color: #FFEBEE;
-    border-color: #CD0B16;
+    background-color: #ffebee;
+    border-color: #cd0b16;
   }
 `;
 
@@ -574,23 +576,25 @@ export const FilterContainer = styled.div`
 
 export const FilterButton = styled.button`
   padding: 8px 16px;
-  background-color: ${props => props.$active ? '#CD0B16' : '#FFFFFF'};
-  color: ${props => props.$active ? '#FFFFFF' : '#666666'};
-  border: 1px solid ${props => props.$active ? '#CD0B16' : 'rgba(0, 0, 0, 0.12)'};
+  background-color: ${(props) => (props.$active ? "#CD0B16" : "#FFFFFF")};
+  color: ${(props) => (props.$active ? "#FFFFFF" : "#666666")};
+  border: 1px solid
+    ${(props) => (props.$active ? "#CD0B16" : "rgba(0, 0, 0, 0.12)")};
   border-radius: 8px;
   font-size: 14px;
-  font-weight: ${props => props.$active ? '600' : '500'};
+  font-weight: ${(props) => (props.$active ? "600" : "500")};
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${props => props.$active ? '#B80F16' : '#FAFAFA'};
-    border-color: ${props => props.$active ? '#B80F16' : 'rgba(0, 0, 0, 0.2)'};
+    background-color: ${(props) => (props.$active ? "#B80F16" : "#FAFAFA")};
+    border-color: ${(props) =>
+      props.$active ? "#B80F16" : "rgba(0, 0, 0, 0.2)"};
   }
 `;
 
 export const AddFormCard = styled.div`
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -612,7 +616,7 @@ export const TextArea = styled.textarea`
   border-radius: 8px;
   font-size: 15px;
   color: #333333;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   box-sizing: border-box;
   transition: all 0.2s ease;
   font-family: inherit;
@@ -624,8 +628,8 @@ export const TextArea = styled.textarea`
 
   &:focus {
     outline: none;
-    border-color: #CD0B16;
-    background-color: #FAFAFA;
+    border-color: #cd0b16;
+    background-color: #fafafa;
   }
 `;
 
@@ -636,11 +640,11 @@ export const HistoryList = styled.div`
 `;
 
 export const HistoryCard = styled.div`
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-left: 4px solid #CD0B16;
+  border-left: 4px solid #cd0b16;
 `;
 
 export const HistoryHeader = styled.div`
@@ -660,8 +664,9 @@ export const HistoryDate = styled.div`
 
 export const TypeBadge = styled.span`
   padding: 4px 12px;
-  background-color: ${props => props.$color ? `${props.$color}15` : '#F5F5F5'};
-  color: ${props => props.$color || '#666666'};
+  background-color: ${(props) =>
+    props.$color ? `${props.$color}15` : "#F5F5F5"};
+  color: ${(props) => props.$color || "#666666"};
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
@@ -670,8 +675,8 @@ export const TypeBadge = styled.span`
 
 export const DeleteButton = styled.button`
   padding: 4px 12px;
-  background-color: #FFFFFF;
-  color: #CD0B16;
+  background-color: #ffffff;
+  color: #cd0b16;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 6px;
   font-size: 12px;
@@ -680,8 +685,8 @@ export const DeleteButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #FFEBEE;
-    border-color: #CD0B16;
+    background-color: #ffebee;
+    border-color: #cd0b16;
   }
 `;
 
@@ -728,4 +733,3 @@ export const EmptyMessage = styled.div`
   color: #999999;
   font-size: 15px;
 `;
-

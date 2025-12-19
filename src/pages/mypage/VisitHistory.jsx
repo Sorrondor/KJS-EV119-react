@@ -1,124 +1,166 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import * as S from './style';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import * as S from "./style";
 
 const VisitHistory = () => {
   const navigate = useNavigate();
   const [isAdding, setIsAdding] = useState(false);
-  const [filter, setFilter] = useState('all'); // all, hospital, clinic, emergency
+  const [filter, setFilter] = useState("all");
 
-  const [visitHistory, setVisitHistory] = useState([
-    {
-      id: 1,
-      date: '2024.01.15',
-      hospital: '강남서울병원',
-      department: '응급의학과',
-      type: 'emergency',
-      reason: '급성 복통',
-      diagnosis: '급성 위염',
-      treatment: '진통제 처방, 위보호제 복용',
-      doctor: '김의사'
-    },
-    {
-      id: 2,
-      date: '2024.01.10',
-      hospital: '역삼성모병원',
-      department: '내과',
-      type: 'hospital',
-      reason: '정기 검진',
-      diagnosis: '고혈압 관리',
-      treatment: '혈압약 조정',
-      doctor: '박의사'
-    },
-    {
-      id: 3,
-      date: '2023.12.20',
-      hospital: '한빛의원',
-      department: '일반의',
-      type: 'clinic',
-      reason: '감기 증상',
-      diagnosis: '상기도 감염',
-      treatment: '해열제, 진해제 처방',
-      doctor: '이의사'
-    }
-  ]);
+  const [visitHistory, setVisitHistory] = useState([]);
 
   const [newVisit, setNewVisit] = useState({
-    date: '',
-    hospital: '',
-    department: '',
-    type: 'hospital',
-    reason: '',
-    diagnosis: '',
-    treatment: '',
-    doctor: ''
+    visitedDate: "",
+    visitedName: "",
+    visitedDepartment: "",
+    visitedType: "HOSPITAL",
+    visitedReason: "",
+    visitedDiagnosis: "",
+    visitedTreatmentContent: "",
+    visitedDoctor: "",
   });
 
-  const handleAdd = () => {
-    if (!newVisit.date || !newVisit.hospital || !newVisit.department) {
-      alert('날짜, 병원명, 진료과를 입력해주세요.');
+  const privateUrl =
+    process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+
+  useEffect(() => {
+    const getVisitedList = async () => {
+      try {
+        const response = await fetch(`${privateUrl}/my-page/visited`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        const result = await response.json();
+        if (result.data) {
+          setVisitHistory(result.data);
+        }
+      } catch (error) {
+        console.error("Error fetching visit history:", error);
+      }
+    };
+    getVisitedList();
+  }, []);
+
+  const handleAdd = async () => {
+    if (
+      !newVisit.visitedDate ||
+      !newVisit.visitedName ||
+      !newVisit.visitedDepartment
+    ) {
+      alert("날짜, 병원명, 진료과를 입력해주세요.");
       return;
     }
 
-    const visit = {
-      id: Date.now(),
-      ...newVisit
-    };
+    try {
+      const response = await fetch(`${privateUrl}/my-page/visited/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify(newVisit),
+      });
 
-    setVisitHistory([visit, ...visitHistory]);
-    setNewVisit({
-      date: '',
-      hospital: '',
-      department: '',
-      type: 'hospital',
-      reason: '',
-      diagnosis: '',
-      treatment: '',
-      doctor: ''
-    });
-    setIsAdding(false);
-    alert('방문 이력이 추가되었습니다.');
+      if (!response.ok) {
+        throw new Error("방문 이력 추가에 실패했습니다.");
+      }
+
+      const result = await response.json();
+      if (result.data) {
+        setVisitHistory(result.data);
+      }
+
+      setNewVisit({
+        visitedDate: "",
+        visitedName: "",
+        visitedDepartment: "",
+        visitedType: "HOSPITAL",
+        visitedReason: "",
+        visitedDiagnosis: "",
+        visitedTreatmentContent: "",
+        visitedDoctor: "",
+      });
+      setIsAdding(false);
+      alert("방문 이력이 추가되었습니다.");
+    } catch (error) {
+      console.error("Error adding visit history:", error);
+      alert(error.message || "방문 이력 추가에 실패했습니다.");
+    }
   };
 
   const handleCancel = () => {
     setNewVisit({
-      date: '',
-      hospital: '',
-      department: '',
-      type: 'hospital',
-      reason: '',
-      diagnosis: '',
-      treatment: '',
-      doctor: ''
+      visitedDate: "",
+      visitedName: "",
+      visitedDepartment: "",
+      visitedType: "HOSPITAL",
+      visitedReason: "",
+      visitedDiagnosis: "",
+      visitedTreatmentContent: "",
+      visitedDoctor: "",
     });
     setIsAdding(false);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('이 방문 이력을 삭제하시겠습니까?')) {
-      setVisitHistory(visitHistory.filter(visit => visit.id !== id));
+  const handleDelete = async (visit) => {
+    if (window.confirm("이 방문 이력을 삭제하시겠습니까?")) {
+      try {
+        const response = await fetch(`${privateUrl}/my-page/visited/delete`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify(visit),
+        });
+
+        if (!response.ok) {
+          throw new Error("방문 이력 삭제에 실패했습니다.");
+        }
+
+        const result = await response.json();
+        if (result.data) {
+          setVisitHistory(result.data);
+        }
+        alert("방문 이력이 삭제되었습니다.");
+      } catch (error) {
+        console.error("Error deleting visit history:", error);
+        alert(error.message || "방문 이력 삭제에 실패했습니다.");
+      }
     }
   };
 
-  const filteredHistory = filter === 'all' 
-    ? visitHistory 
-    : visitHistory.filter(visit => visit.type === filter);
+  const filteredHistory =
+    filter === "all"
+      ? visitHistory
+      : visitHistory.filter((visit) => visit.visitedType === filter);
 
-  const getTypeLabel = (type) => {
-    switch(type) {
-      case 'emergency': return '응급실';
-      case 'hospital': return '병원';
-      case 'clinic': return '의원';
-      default: return '';
+  const getTypeLabel = (visitedType) => {
+    switch (visitedType) {
+      case "EMERGENCY":
+        return "응급실";
+      case "HOSPITAL":
+        return "병원";
+      case "CLINIC":
+        return "의원";
+      default:
+        return "";
     }
   };
 
-  const getTypeColor = (type) => {
-    switch(type) {
-      case 'emergency': return '#CD0B16';
-      case 'hospital': return '#2196F3';
-      case 'clinic': return '#4CAF50';
-      default: return '#666666';
+  const getTypeColor = (visitedType) => {
+    switch (visitedType) {
+      case "EMERGENCY":
+        return "#CD0B16";
+      case "HOSPITAL":
+        return "#2196F3";
+      case "CLINIC":
+        return "#4CAF50";
+      default:
+        return "#666666";
     }
   };
 
@@ -131,28 +173,24 @@ const VisitHistory = () => {
 
       <S.Content>
         <S.FilterContainer>
-          <S.FilterButton 
-            $active={filter === 'all'} 
-            onClick={() => setFilter('all')}
-          >
+          <S.FilterButton
+            $active={filter === "all"}
+            onClick={() => setFilter("all")}>
             전체
           </S.FilterButton>
-          <S.FilterButton 
-            $active={filter === 'emergency'} 
-            onClick={() => setFilter('emergency')}
-          >
+          <S.FilterButton
+            $active={filter === "EMERGENCY"}
+            onClick={() => setFilter("EMERGENCY")}>
             응급실
           </S.FilterButton>
-          <S.FilterButton 
-            $active={filter === 'hospital'} 
-            onClick={() => setFilter('hospital')}
-          >
+          <S.FilterButton
+            $active={filter === "HOSPITAL"}
+            onClick={() => setFilter("HOSPITAL")}>
             병원
           </S.FilterButton>
-          <S.FilterButton 
-            $active={filter === 'clinic'} 
-            onClick={() => setFilter('clinic')}
-          >
+          <S.FilterButton
+            $active={filter === "CLINIC"}
+            onClick={() => setFilter("CLINIC")}>
             의원
           </S.FilterButton>
         </S.FilterContainer>
@@ -170,16 +208,20 @@ const VisitHistory = () => {
               <S.Label>방문일</S.Label>
               <S.Input
                 type="date"
-                value={newVisit.date}
-                onChange={(e) => setNewVisit({...newVisit, date: e.target.value})}
+                value={newVisit.visitedDate}
+                onChange={(e) =>
+                  setNewVisit({ ...newVisit, visitedDate: e.target.value })
+                }
               />
             </S.InputGroup>
             <S.InputGroup>
               <S.Label>병원명</S.Label>
               <S.Input
                 type="text"
-                value={newVisit.hospital}
-                onChange={(e) => setNewVisit({...newVisit, hospital: e.target.value})}
+                value={newVisit.visitedName}
+                onChange={(e) =>
+                  setNewVisit({ ...newVisit, visitedName: e.target.value })
+                }
                 placeholder="병원명을 입력하세요"
               />
             </S.InputGroup>
@@ -187,27 +229,35 @@ const VisitHistory = () => {
               <S.Label>진료과</S.Label>
               <S.Input
                 type="text"
-                value={newVisit.department}
-                onChange={(e) => setNewVisit({...newVisit, department: e.target.value})}
+                value={newVisit.visitedDepartment}
+                onChange={(e) =>
+                  setNewVisit({
+                    ...newVisit,
+                    visitedDepartment: e.target.value,
+                  })
+                }
                 placeholder="진료과를 입력하세요"
               />
             </S.InputGroup>
             <S.InputGroup>
               <S.Label>방문 유형</S.Label>
               <S.Select
-                value={newVisit.type}
-                onChange={(e) => setNewVisit({...newVisit, type: e.target.value})}
-              >
-                <option value="hospital">병원</option>
-                <option value="clinic">의원</option>
-                <option value="emergency">응급실</option>
+                value={newVisit.visitedType}
+                onChange={(e) =>
+                  setNewVisit({ ...newVisit, visitedType: e.target.value })
+                }>
+                <option value="HOSPITAL">병원</option>
+                <option value="CLINIC">의원</option>
+                <option value="EMERGENCY">응급실</option>
               </S.Select>
             </S.InputGroup>
             <S.InputGroup>
               <S.Label>방문 사유</S.Label>
               <S.TextArea
-                value={newVisit.reason}
-                onChange={(e) => setNewVisit({...newVisit, reason: e.target.value})}
+                value={newVisit.visitedReason}
+                onChange={(e) =>
+                  setNewVisit({ ...newVisit, visitedReason: e.target.value })
+                }
                 placeholder="방문 사유를 입력하세요"
                 rows="3"
               />
@@ -216,16 +266,23 @@ const VisitHistory = () => {
               <S.Label>진단명</S.Label>
               <S.Input
                 type="text"
-                value={newVisit.diagnosis}
-                onChange={(e) => setNewVisit({...newVisit, diagnosis: e.target.value})}
+                value={newVisit.visitedDiagnosis}
+                onChange={(e) =>
+                  setNewVisit({ ...newVisit, visitedDiagnosis: e.target.value })
+                }
                 placeholder="진단명을 입력하세요"
               />
             </S.InputGroup>
             <S.InputGroup>
               <S.Label>치료 내용</S.Label>
               <S.TextArea
-                value={newVisit.treatment}
-                onChange={(e) => setNewVisit({...newVisit, treatment: e.target.value})}
+                value={newVisit.visitedTreatmentContent}
+                onChange={(e) =>
+                  setNewVisit({
+                    ...newVisit,
+                    visitedTreatmentContent: e.target.value,
+                  })
+                }
                 placeholder="치료 내용을 입력하세요"
                 rows="3"
               />
@@ -234,8 +291,10 @@ const VisitHistory = () => {
               <S.Label>담당 의사</S.Label>
               <S.Input
                 type="text"
-                value={newVisit.doctor}
-                onChange={(e) => setNewVisit({...newVisit, doctor: e.target.value})}
+                value={newVisit.visitedDoctor}
+                onChange={(e) =>
+                  setNewVisit({ ...newVisit, visitedDoctor: e.target.value })
+                }
                 placeholder="담당 의사명을 입력하세요"
               />
             </S.InputGroup>
@@ -249,41 +308,45 @@ const VisitHistory = () => {
         <S.HistoryList>
           {filteredHistory.length === 0 ? (
             <S.EmptyMessage>
-              {filter === 'all' ? '방문 이력이 없습니다.' : '해당 유형의 방문 이력이 없습니다.'}
+              {filter === "all"
+                ? "방문 이력이 없습니다."
+                : "해당 유형의 방문 이력이 없습니다."}
             </S.EmptyMessage>
           ) : (
-            filteredHistory.map((visit) => (
-              <S.HistoryCard key={visit.id}>
+            filteredHistory.map((visit, index) => (
+              <S.HistoryCard key={index}>
                 <S.HistoryHeader>
-                  <S.HistoryDate>{visit.date}</S.HistoryDate>
-                  <S.TypeBadge $color={getTypeColor(visit.type)}>
-                    {getTypeLabel(visit.type)}
+                  <S.HistoryDate>{visit.visitedDate}</S.HistoryDate>
+                  <S.TypeBadge $color={getTypeColor(visit.visitedType)}>
+                    {getTypeLabel(visit.visitedType)}
                   </S.TypeBadge>
-                  <S.DeleteButton onClick={() => handleDelete(visit.id)}>
+                  <S.DeleteButton onClick={() => handleDelete(visit)}>
                     삭제
                   </S.DeleteButton>
                 </S.HistoryHeader>
-                <S.HospitalName>{visit.hospital}</S.HospitalName>
-                <S.Department>{visit.department}</S.Department>
-                {visit.doctor && (
-                  <S.DoctorInfo>담당의: {visit.doctor}</S.DoctorInfo>
+                <S.HospitalName>{visit.visitedName}</S.HospitalName>
+                <S.Department>{visit.visitedDepartment}</S.Department>
+                {visit.visitedDoctor && (
+                  <S.DoctorInfo>담당의: {visit.visitedDoctor}</S.DoctorInfo>
                 )}
-                {visit.reason && (
+                {visit.visitedReason && (
                   <S.InfoRow>
                     <S.InfoLabel>방문 사유:</S.InfoLabel>
-                    <S.InfoValue>{visit.reason}</S.InfoValue>
+                    <S.InfoValue>{visit.visitedReason}</S.InfoValue>
                   </S.InfoRow>
                 )}
-                {visit.diagnosis && (
+                {visit.visitedDiagnosis && (
                   <S.InfoRow>
                     <S.InfoLabel>진단명:</S.InfoLabel>
-                    <S.InfoValue $highlight>{visit.diagnosis}</S.InfoValue>
+                    <S.InfoValue $highlight>
+                      {visit.visitedDiagnosis}
+                    </S.InfoValue>
                   </S.InfoRow>
                 )}
-                {visit.treatment && (
+                {visit.visitedTreatmentContent && (
                   <S.InfoRow>
                     <S.InfoLabel>치료 내용:</S.InfoLabel>
-                    <S.InfoValue>{visit.treatment}</S.InfoValue>
+                    <S.InfoValue>{visit.visitedTreatmentContent}</S.InfoValue>
                   </S.InfoRow>
                 )}
               </S.HistoryCard>
@@ -296,4 +359,3 @@ const VisitHistory = () => {
 };
 
 export default VisitHistory;
-
