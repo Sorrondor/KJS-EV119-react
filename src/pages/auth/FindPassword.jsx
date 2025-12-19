@@ -80,7 +80,7 @@ const FindPassword = () => {
       setIsLoading(true);
 
       const response = await fetch(
-        `${BACKEND_URL}/sms/verify?memberPhone=${encodeURIComponent(memberPhone)}&authCode=${encodeURIComponent(authCode)}`,
+        `${BACKEND_URL}/api/member/verify?memberPhone=${encodeURIComponent(memberPhone)}&authCode=${encodeURIComponent(authCode)}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -99,10 +99,10 @@ const FindPassword = () => {
         return;
       }
 
-      const resetToken = result?.resetToken;
+      const resetToken = result?.data?.resetToken;
 
       if(!resetToken) {
-        setError("refreshToken이 응답에 없습니다.");
+        setError("resetToken이 응답에 없습니다.");
         return;
       }
 
