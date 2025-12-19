@@ -189,6 +189,11 @@ const Login = () => {
                 계정이 없으신가요? <S.StyledLink to="/auth/signup">회원가입</S.StyledLink>
               </S.LinkText>
             </S.LinkContainer>
+            <S.LinkContainer>
+              <S.LinkText>
+                비밀번호를 잊으셨나요? <S.StyledLink to ="/auth/findPassword">비밀번호 찾기</S.StyledLink>
+              </S.LinkText>
+            </S.LinkContainer>
           </S.Form>
         </S.FormCard>
       </S.MainContent>

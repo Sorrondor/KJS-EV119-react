@@ -11,6 +11,7 @@ const MapContainer = () => {
   const [sortBy, setSortBy] = useState('distance');
   const [location, setLocation] = useState(null);   
   const [map, setMap] = useState(null);
+  const [myLocation, setMyLocation] = useState(null);
 
   const [center, setCenter] = useState({
     lat: 37.5665,   
@@ -162,8 +163,33 @@ const MapContainer = () => {
     }
   };
 
+  const getMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert("위치 정보를 지원하지 않는 브라우저입니다.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+
+        const next = { lat: latitude, lng: longitude };
+
+        setCenter(next);        
+        setMyLocation(next);    
+
+        console.log("현재위치", latitude, longitude);
+      },
+      (error) => {
+        console.error("위치 가져오기 실패", error);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
+
+
   const handleRelocate = () => {
-    // 나중에 위치 재탐색 로직 다시 호출하도록 만들면 됨
+    getMyLocation();
     console.log('위치 재탐색');
   };
 
