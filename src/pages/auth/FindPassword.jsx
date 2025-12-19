@@ -9,6 +9,7 @@ const FindPassword = () => {
 
   const [memberPhone, setMemberPhone] = useState('');
   const [authCode, setAuthCode] = useState('');
+  const [memberEmail, setMemberEmail] = useState('');
 
   const [step, setStep] = useState(1); 
   const [error, setError] = useState('');
@@ -93,6 +94,9 @@ const FindPassword = () => {
       } catch {
         result = null;
       }
+  
+
+
 
       if (!response.ok) {
         setError(result?.message || '인증번호가 일치하지 않습니다.');
@@ -100,6 +104,9 @@ const FindPassword = () => {
       }
 
       const resetToken = result?.data?.resetToken;
+      const emailFromServer = result?.data?.memberEmail;
+      
+
 
       if(!resetToken) {
         setError("resetToken이 응답에 없습니다.");
@@ -112,6 +119,7 @@ const FindPassword = () => {
       state: {
         resetToken,
         memberPhone,
+        memberEmail: "테스트값",
       },
     });
   } catch (e) {
