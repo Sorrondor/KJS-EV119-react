@@ -76,6 +76,8 @@ const RouteGuidance = () => {
   }
 
   const handleStartNavigation = () => {
+    // Navigation 페이지로 이동
+    navigate(`/main/navigation/${id}`);
     // 실제 네비게이션 앱 연동
     const url = `https://map.kakao.com/link/to/${encodeURIComponent(
       routeInfo.name

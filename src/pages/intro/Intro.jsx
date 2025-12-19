@@ -317,7 +317,7 @@ const Intro = () => {
     })[0];
     
     if (nearestRoom) {
-      navigate(`/main/route/${nearestRoom.id}`);
+      navigate(`/main/navigation/${nearestRoom.id}`);
     }
   };
 
