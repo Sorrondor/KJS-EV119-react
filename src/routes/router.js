@@ -11,6 +11,7 @@ import Profile from "../pages/mypage/Profile";
 import HealthInfo from "../pages/mypage/HealthInfo";
 import VisitHistory from "../pages/mypage/VisitHistory";
 import SocialRedirect from "../pages/auth/SocialRedirect";
+import Navigation from "../pages/navigation/Navigation";
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
   {
     path: "/main/route/:id",
     element: <RouteGuidance />
+  },
+  {
+    path: "/main/navigation/:id",
+    element: <Navigation />
   },
   {
     path: "/main/help",
