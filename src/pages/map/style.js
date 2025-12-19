@@ -71,6 +71,13 @@ export const HeaderControls = styled.div`
   box-sizing: border-box;
 `;
 
+export const SearchContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  align-items: center;
+`;
+
 export const SearchInput = styled.input`
   flex: 1;
   height: 48px;
@@ -91,6 +98,36 @@ export const SearchInput = styled.input`
     outline: none;
     border-color: rgba(0, 0, 0, 0.3);
     box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+export const SearchButton = styled.button`
+  height: 48px;
+  padding: 0 20px;
+  background-color: #CD0B16;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #B80F16;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(205, 11, 22, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
   }
 `;
 
@@ -121,9 +158,9 @@ export const RelocateButton = styled.button`
 export const NearestRouteButton = styled.button`
   height: 48px;
   padding: 0 24px;
-  background-color: #FFFFFF;
-  color: #CD0B16;
-  border: 2px solid rgba(0, 0, 0, 0.3);
+  background-color: #CD0B16;
+  color: #FFFFFF;
+  border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -132,9 +169,9 @@ export const NearestRouteButton = styled.button`
   white-space: nowrap;
 
   &:hover {
-    background-color: #FFF5F5;
+    background-color: #B80F16;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(205, 11, 22, 0.15);
+    box-shadow: 0 4px 12px rgba(205, 11, 22, 0.3);
   }
 
   &:active {
