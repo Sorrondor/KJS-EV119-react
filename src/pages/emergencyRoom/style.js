@@ -267,3 +267,15 @@ export const Loading = styled.div`
   color: #666666;
 `;
 
+export const ErrorMessage = styled.div`
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #FFF5F5;
+  border: 2px solid rgba(205, 11, 22, 0.3);
+  border-radius: 12px;
+  color: #CD0B16;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 40px 0;
+`;
+

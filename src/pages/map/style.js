@@ -2,41 +2,55 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
   background-color: #FAFAFA;
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
 `;
 
 export const Header = styled.div`
   width: 100%;
+  max-width: 100vw;
   padding: 32px 40px;
   background-color: #FAFAFA;
   border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  margin: 0;
 `;
 
 export const Title = styled.h1`
+  width: 100%;
   font-size: 32px;
   font-weight: 700;
   color: #CD0B16;
   margin: 0 0 12px 0;
+  box-sizing: border-box;
 `;
 
 export const Description = styled.p`
+  width: 100%;
   font-size: 16px;
   color: #666666;
   margin: 0 0 20px 0;
   line-height: 1.6;
+  box-sizing: border-box;
 `;
 
 export const LocationInfo = styled.div`
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 20px;
   font-size: 14px;
   color: #333333;
+  box-sizing: border-box;
 `;
 
 export const LocationDot = styled.div`
@@ -49,10 +63,12 @@ export const LocationDot = styled.div`
 `;
 
 export const HeaderControls = styled.div`
+  width: 100%;
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
   align-items: center;
+  box-sizing: border-box;
 `;
 
 export const SearchInput = styled.input`
@@ -127,9 +143,11 @@ export const NearestRouteButton = styled.button`
 `;
 
 export const Legend = styled.div`
+  width: 100%;
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
+  box-sizing: border-box;
 `;
 
 export const LegendItem = styled.div`
@@ -150,8 +168,10 @@ export const LegendDot = styled.div`
 export const MainContent = styled.div`
   display: flex;
   flex: 1;
-  height: calc(100vh - 280px);
-  min-height: 600px;
+  height: calc(100vh - 200px);
+  min-height: 500px;
+  overflow: hidden;
+  min-height: 0;
 `;
 
 export const MapArea = styled.div`
@@ -159,15 +179,38 @@ export const MapArea = styled.div`
   background-color: #F5F5F5;
   position: relative;
   border-right: 2px solid rgba(0, 0, 0, 0.15);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const MapPlaceholder = styled.div`
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: 1;
+  position: relative;
   background: #E0E0E0;
+  min-height: 0;
+  
+  /* 로딩/에러 메시지용 */
+  > div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #666666;
+  }
+  
+  /* 카카오맵 컨테이너 */
+  > div[style*="width"] {
+    width: 100% !important;
+    height: 100% !important;
+  }
 `;
 
 export const MapInstruction = styled.div`
@@ -233,6 +276,30 @@ export const StatusLegend = styled.div`
   border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.15);
   flex-wrap: wrap;
+`;
+
+export const LoadingMessage = styled.div`
+  padding: 40px 20px;
+  text-align: center;
+  color: #666666;
+  font-size: 16px;
+`;
+
+export const ErrorMessage = styled.div`
+  padding: 20px;
+  background-color: #FFF5F5;
+  border: 2px solid rgba(205, 11, 22, 0.3);
+  border-radius: 8px;
+  color: #CD0B16;
+  font-size: 14px;
+  margin-bottom: 24px;
+`;
+
+export const EmptyMessage = styled.div`
+  padding: 40px 20px;
+  text-align: center;
+  color: #999999;
+  font-size: 16px;
 `;
 
 export const EmergencyRoomList = styled.div`
@@ -309,6 +376,12 @@ export const RoomDistance = styled.p`
   font-size: 14px;
   color: #CD0B16;
   font-weight: 600;
+  margin: 0 0 8px 0;
+`;
+
+export const RoomPhone = styled.p`
+  font-size: 13px;
+  color: #666666;
   margin: 0 0 12px 0;
 `;
 
@@ -372,5 +445,53 @@ export const HelpButton = styled.button`
   &:active {
     transform: translateY(0);
   }
+`;
+
+export const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 16px 0;
+`;
+
+export const PaginationButton = styled.button`
+  min-width: 60px;
+  height: 36px;
+  padding: 0 16px;
+  background-color: #FFFFFF;
+  color: #CD0B16;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #FFF5F5;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(205, 11, 22, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #F5F5F5;
+    color: #999999;
+  }
+`;
+
+export const PaginationInfo = styled.span`
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+  min-width: 60px;
+  text-align: center;
 `;
 
