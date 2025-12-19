@@ -272,8 +272,9 @@ export const ResultCard = styled.div`
   background-color: #FFFFFF;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-left: 3px solid ${props => {
-    if (props.$urgency === 'critical') return '#CD0B16';
-    if (props.$urgency === 'high') return '#FF9800';
+    const level = String(props.$urgency || '').toUpperCase();
+    if (level === 'CRITICAL') return '#CD0B16';
+    if (level === 'HIGH') return '#FF9800';
     return '#9E9E9E';
   }};
   border-radius: 8px;
@@ -309,13 +310,15 @@ export const UrgencyBadge = styled.span`
   font-weight: 500;
   white-space: nowrap;
   background-color: ${props => {
-    if (props.$urgency === 'critical') return '#FFEBEE';
-    if (props.$urgency === 'high') return '#FFF3E0';
+    const level = String(props.$urgency || '').toUpperCase();
+    if (level === 'CRITICAL') return '#FFEBEE';
+    if (level === 'HIGH') return '#FFF3E0';
     return '#F5F5F5';
   }};
   color: ${props => {
-    if (props.$urgency === 'critical') return '#CD0B16';
-    if (props.$urgency === 'high') return '#FF9800';
+    const level = String(props.$urgency || '').toUpperCase();
+    if (level === 'CRITICAL') return '#CD0B16';
+    if (level === 'HIGH') return '#FF9800';
     return '#666666';
   }};
 `;
@@ -496,4 +499,3 @@ export const RouteSubtitle = styled.div`
   opacity: 0.9;
   line-height: 1.2;
 `;
-
