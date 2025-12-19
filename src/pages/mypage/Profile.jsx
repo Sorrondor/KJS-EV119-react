@@ -1,27 +1,35 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import * as S from './style';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import * as S from "./style";
 
 const Profile = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '홍길동',
-    email: 'hong@example.com',
-    phone: '010-1234-5678'
-  });
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("member"));
+    if (user) {
+      setFormData({
+        memberName: user.memberName || "-",
+        memberEmail: user.memberEmail || "-",
+        memberPhone: user.memberPhone || "-",
+      });
+    }
+  }, []);
+
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
@@ -29,44 +37,78 @@ const Profile = () => {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = '이름을 입력해주세요.';
+    if (!formData.memberName.trim()) {
+      newErrors.memberName = "이름을 입력해주세요.";
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = '이메일을 입력해주세요.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = '올바른 이메일 형식이 아닙니다.';
+    if (!formData.memberEmail.trim()) {
+      newErrors.memberEmail = "이메일을 입력해주세요.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.memberEmail)) {
+      newErrors.memberEmail = "올바른 이메일 형식이 아닙니다.";
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = '전화번호를 입력해주세요.';
-    } else if (!/^010-\d{4}-\d{4}$/.test(formData.phone)) {
-      newErrors.phone = '올바른 전화번호 형식이 아닙니다. (010-0000-0000)';
+    if (!formData.memberPhone.trim()) {
+      newErrors.memberPhone = "전화번호를 입력해주세요.";
+    } else if (!/^010\d{4}\d{4}$/.test(formData.memberPhone)) {
+      newErrors.memberPhone =
+        "올바른 전화번호 형식이 아닙니다. (01000000000 숫자만 입력)";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const privateUrl =
+    process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+
+  const updateUserData = async (newData) => {
+    const response = await fetch(`${privateUrl}/my-page/edit`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+      body: JSON.stringify(newData),
+    });
+    if (!response.ok) {
+      throw new Error("회원정보 수정에 실패했습니다.");
+    }
+    const result = await response.json();
+    const updatedUser = result.data;
+    localStorage.setItem("member", JSON.stringify(updatedUser));
+    return updatedUser;
+  };
+
+  const handleSave = async () => {
     if (!validate()) {
       return;
     }
 
-    // 회원정보 수정 API 호출
-    console.log('회원정보 수정:', formData);
-    alert('회원정보가 수정되었습니다.');
-    setIsEditing(false);
+    try {
+      // 회원정보 수정 API 호출
+      const updatedUser = await updateUserData(formData);
+      setFormData({
+        memberName: updatedUser.memberName || "-",
+        memberEmail: updatedUser.memberEmail || "-",
+        memberPhone: updatedUser.memberPhone || "-",
+      });
+      alert("회원정보가 수정되었습니다.");
+      setIsEditing(false);
+    } catch (error) {
+      alert(error.message || "회원정보 수정에 실패했습니다.");
+    }
   };
 
   const handleCancel = () => {
     // 원래 데이터로 복원
-    setFormData({
-      name: '홍길동',
-      email: 'hong@example.com',
-      phone: '010-1234-5678'
-    });
+    const user = JSON.parse(localStorage.getItem("member"));
+    if (user) {
+      setFormData({
+        memberName: user.memberName || "-",
+        memberEmail: user.memberEmail || "-",
+        memberPhone: user.memberPhone || "-",
+      });
+    }
     setErrors({});
     setIsEditing(false);
   };
@@ -84,9 +126,7 @@ const Profile = () => {
             <S.ProfileIcon>👤</S.ProfileIcon>
           </S.ProfileImage>
           {!isEditing && (
-            <S.EditButton onClick={() => setIsEditing(true)}>
-              수정
-            </S.EditButton>
+            <S.EditButton onClick={() => setIsEditing(true)}>수정</S.EditButton>
           )}
         </S.ProfileSection>
 
@@ -97,15 +137,17 @@ const Profile = () => {
               <>
                 <S.Input
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="memberName"
+                  value={formData.memberName}
                   onChange={handleChange}
                   placeholder="이름을 입력하세요"
                 />
-                {errors.name && <S.FieldError>{errors.name}</S.FieldError>}
+                {errors.memberName && (
+                  <S.FieldError>{errors.memberName}</S.FieldError>
+                )}
               </>
             ) : (
-              <S.InfoValue>{formData.name}</S.InfoValue>
+              <S.InfoValue>{formData.memberName}</S.InfoValue>
             )}
           </S.InputGroup>
 
@@ -115,15 +157,17 @@ const Profile = () => {
               <>
                 <S.Input
                   type="email"
-                  name="email"
-                  value={formData.email}
+                  name="memberEmail"
+                  value={formData.memberEmail}
                   onChange={handleChange}
                   placeholder="이메일을 입력하세요"
                 />
-                {errors.email && <S.FieldError>{errors.email}</S.FieldError>}
+                {errors.memberEmail && (
+                  <S.FieldError>{errors.memberEmail}</S.FieldError>
+                )}
               </>
             ) : (
-              <S.InfoValue>{formData.email}</S.InfoValue>
+              <S.InfoValue>{formData.memberEmail}</S.InfoValue>
             )}
           </S.InputGroup>
 
@@ -133,15 +177,17 @@ const Profile = () => {
               <>
                 <S.Input
                   type="tel"
-                  name="phone"
-                  value={formData.phone}
+                  name="memberPhone"
+                  value={formData.memberPhone}
                   onChange={handleChange}
-                  placeholder="010-0000-0000"
+                  placeholder="01000000000 (숫자만 입력)"
                 />
-                {errors.phone && <S.FieldError>{errors.phone}</S.FieldError>}
+                {errors.memberPhone && (
+                  <S.FieldError>{errors.memberPhone}</S.FieldError>
+                )}
               </>
             ) : (
-              <S.InfoValue>{formData.phone}</S.InfoValue>
+              <S.InfoValue>{formData.memberPhone}</S.InfoValue>
             )}
           </S.InputGroup>
 
@@ -158,4 +204,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
