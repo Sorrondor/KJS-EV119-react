@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as S from './style';
 
@@ -16,6 +16,12 @@ const ResetPassword = () => {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!resetToken) {
+      setError('인증 정보가 없습니다. 비밀번호 찾기부터 다시 진행해주세요.');
+    }
+  }, [resetToken]);
 
   const handleSubmit = async () => {
     setError('');
@@ -41,12 +47,17 @@ const ResetPassword = () => {
     try {
       setIsLoading(true);
 
+      const params = new URLSearchParams({
+        resetToken,
+        newPassword,
+      });
+
       const response = await fetch(`${BACKEND_URL}/api/member/password/reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          resetToken,
-          newPassword,
+        resetToken,
+        newPassword,
         }),
       });
 
@@ -62,7 +73,7 @@ const ResetPassword = () => {
         return;
       }
 
-      setInfo('비밀번호가 변경되었습니다. 다시 로그인해주세요.');
+      setInfo(result?.message || '비밀번호가 변경되었습니다. 다시 로그인해주세요.');
       setTimeout(() => navigate('/auth/login'), 800);
     } catch (e) {
       console.error(e);
@@ -83,7 +94,9 @@ const ResetPassword = () => {
         <S.FormCard>
           <S.FormTitle>비밀번호 재설정</S.FormTitle>
           <S.FormSubtitle>
-            {memberPhone ? `${memberPhone} 계정의 새 비밀번호를 설정해주세요` : '새 비밀번호를 설정해주세요'}
+            {memberPhone
+              ? `${memberPhone} 계정의 새 비밀번호를 설정해주세요`
+              : '새 비밀번호를 설정해주세요'}
           </S.FormSubtitle>
 
           <S.Form onSubmit={(e) => e.preventDefault()}>
@@ -94,6 +107,8 @@ const ResetPassword = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="8자 이상 입력"
+                autoComplete="new-password"
+                disabled={isLoading}
               />
             </S.InputGroup>
 
@@ -104,13 +119,19 @@ const ResetPassword = () => {
                 value={newPassword2}
                 onChange={(e) => setNewPassword2(e.target.value)}
                 placeholder="비밀번호를 다시 입력"
+                autoComplete="new-password"
+                disabled={isLoading}
               />
             </S.InputGroup>
 
             {error && <S.ErrorMessage>{error}</S.ErrorMessage>}
             {info && <S.InfoMessage>{info}</S.InfoMessage>}
 
-            <S.SubmitButton type="button" onClick={handleSubmit} disabled={isLoading}>
+            <S.SubmitButton
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading || !resetToken}
+            >
               {isLoading ? '변경 중...' : '비밀번호 변경'}
             </S.SubmitButton>
 
