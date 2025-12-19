@@ -120,6 +120,17 @@ export const ErrorMessage = styled.div`
   text-align: center;
 `;
 
+
+export const InfoMessage = styled.div`
+  padding: 12px;
+  background-color: #E8F5E9;
+  border: 1px solid #C8E6C9;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1B5E20;
+  text-align: center;
+`;
+
 export const SubmitButton = styled.button`
   width: 100%;
   height: 52px;
@@ -141,6 +152,13 @@ export const SubmitButton = styled.button`
 
   &:active {
     transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 `;
 
@@ -208,7 +226,7 @@ export const SocialIcon = styled.span`
 
 export const LinkContainer = styled.div`
   text-align: center;
-  margin-top: 8px;
+  margin-top: 5px;
 `;
 
 export const LinkText = styled.p`
@@ -227,3 +245,64 @@ export const StyledLink = styled(Link)`
   }
 `;
 
+
+export const ButtonRow = styled.div`
+  display: flex;
+  gap: 10px;
+  width: 100%;
+
+  ${SubmitButton} {
+    flex: 1;
+    margin-top: 8px;
+  }
+`;
+
+
+export const GhostButton = styled.button`
+  height: 52px;
+  margin-top: 8px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background-color: #FFFFFF;
+  color: #333333;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+`;
+
+
+export const TextButton = styled.button`
+  border: none;
+  background: transparent;
+  color: #CD0B16;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
