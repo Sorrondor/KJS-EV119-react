@@ -52,9 +52,8 @@ const RouteGuidance = () => {
   }
 
   const handleStartNavigation = () => {
-    // 실제 네비게이션 앱 연동
-    const url = `https://map.kakao.com/link/to/${encodeURIComponent(routeInfo.name)},37.5010,127.0374`;
-    window.open(url, '_blank');
+    // Navigation 페이지로 이동
+    navigate(`/main/navigation/${id}`);
   };
 
   const handleToggleRoute = () => {
