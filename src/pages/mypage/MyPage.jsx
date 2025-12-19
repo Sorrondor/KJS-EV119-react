@@ -57,7 +57,46 @@ const MyPage = () => {
       });
     }
   };
+    const getMemberId = () => {
+      const member = JSON.parse(localStorage.getItem("member") || "null");
+      return member?.memberId ?? member?.id ?? null
+    }
 
+  
+    const withdrawFun = async() => {
+      const memberId= getMemberId();
+      if(!memberId) throw new Error("memberId를 찾을 수 없습니다.");
+
+      const response = await fetch(`${privateUrl}/api/member/withdraw?memberId=${memberId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        credentials: "include",
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if(!response.ok) {
+        const message = result?.message || "회원탈퇴에 실패했습니다.";
+        throw new Error(message);
+      }
+
+      localStorage.clear();
+    };
+
+    const handleWithdraw = () => {
+      if(window.confirm("정말 탈퇴하시겠습니까?")) {
+        withdrawFun().then(() => {
+          alert("탈퇴가 완료되었습니다.");
+          navigate("/");
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+      }
+    }
+  
   return (
     <S.Container>
       <S.Header>
@@ -128,6 +167,7 @@ const MyPage = () => {
         </S.MenuSection>
 
         <S.LogoutButton onClick={handleLogout}>로그아웃</S.LogoutButton>
+        <S.LogoutButton onClick={handleWithdraw}>회원탈퇴</S.LogoutButton>
       </S.Content>
     </S.Container>
   );
