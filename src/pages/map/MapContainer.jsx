@@ -23,7 +23,7 @@ const MapContainer = () => {
   const ITEMS_PER_PAGE = 4;
 
   const [myLocation, setMyLocation] = useState(null);
-
+  const [currentAddress, setCurrentAddress] = useState('위치 정보를 가져오는 중...');
 
   const [center, setCenter] = useState({
     lat: 37.5665,   
@@ -300,6 +300,53 @@ const MapContainer = () => {
     return R * c;
   };
 
+  // 좌표를 주소로 변환 (역지오코딩)
+  const getAddressFromCoords = (lat, lng) => {
+    if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+      return;
+    }
+
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    const coord = new window.kakao.maps.LatLng(lat, lng);
+
+    geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const address = result[0];
+        let addressName = '';
+        
+        // 도로명 주소가 있으면 도로명 주소 사용, 없으면 지번 주소 사용
+        if (address.road_address) {
+          addressName = address.road_address.address_name;
+        } else if (address.address) {
+          addressName = address.address.address_name;
+        }
+        
+        if (addressName) {
+          // "서울특별시 강남구 역삼동" 형식에서 "서울 강남구 역삼동 근처" 형식으로 변환
+          const formattedAddress = addressName
+            .replace('서울특별시', '서울')
+            .replace('광역시', '')
+            .replace('특별시', '')
+            .replace('특별자치시', '')
+            .replace('특별자치도', '');
+          
+          setCurrentAddress(`${formattedAddress} 근처`);
+        } else {
+          setCurrentAddress('주소를 가져올 수 없습니다.');
+        }
+      } else {
+        setCurrentAddress('주소를 가져올 수 없습니다.');
+      }
+    });
+  };
+
+  // center가 변경될 때마다 주소 업데이트
+  useEffect(() => {
+    if (center.lat && center.lng && window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      getAddressFromCoords(center.lat, center.lng);
+    }
+  }, [center]);
+
   // 지도가 생성된 후 center가 변경되면 지도 중심 업데이트
   useEffect(() => {
     if (!mapInstanceRef.current || !window.kakao || !window.kakao.maps) return;
@@ -369,9 +416,91 @@ const MapContainer = () => {
     }
   };
 
+  const performSearch = async () => {
+    if (!searchTerm.trim()) {
+      return;
+    }
+
+    const searchQuery = searchTerm.trim();
+    setLoading(true);
+    setApiError(null);
+
+    try {
+      // 1. 먼저 병원명으로 검색 (응급실 목록에서)
+      const matchedHospital = emergencyRooms.find(room => 
+        room.name.includes(searchQuery) || 
+        room.address.includes(searchQuery)
+      );
+
+      if (matchedHospital) {
+        // 병원을 찾았으면 해당 병원 위치로 이동
+        const newCenter = { lat: matchedHospital.lat, lng: matchedHospital.lng };
+        setCenter(newCenter);
+        
+        // 지도 중심 이동
+        if (mapInstanceRef.current && window.kakao && window.kakao.maps) {
+          const { kakao } = window;
+          const map = mapInstanceRef.current;
+          const moveLatLon = new kakao.maps.LatLng(newCenter.lat, newCenter.lng);
+          map.setCenter(moveLatLon);
+          map.setLevel(3);
+        }
+        
+        setLoading(false);
+        return;
+      }
+
+      // 2. 지역명으로 검색 (카카오맵 Places API 사용)
+      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+        throw new Error('카카오맵 서비스를 사용할 수 없습니다.');
+      }
+
+      const places = new window.kakao.maps.services.Places();
+      
+      places.keywordSearch(searchQuery, (data, status) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          if (data && data.length > 0) {
+            const firstResult = data[0];
+            const newCenter = {
+              lat: parseFloat(firstResult.y),
+              lng: parseFloat(firstResult.x)
+            };
+            
+            setCenter(newCenter);
+            
+            // 지도 중심 이동
+            if (mapInstanceRef.current && window.kakao && window.kakao.maps) {
+              const { kakao } = window;
+              const map = mapInstanceRef.current;
+              const moveLatLon = new kakao.maps.LatLng(newCenter.lat, newCenter.lng);
+              map.setCenter(moveLatLon);
+              map.setLevel(3);
+            }
+            
+            // 해당 지역의 응급실 검색
+            fetchEmergencyRooms(newCenter.lat, newCenter.lng);
+          } else {
+            setApiError(`"${searchQuery}"에 대한 검색 결과가 없습니다.`);
+            setLoading(false);
+          }
+        } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+          setApiError(`"${searchQuery}"에 대한 검색 결과가 없습니다.`);
+          setLoading(false);
+        } else {
+          setApiError('검색 중 오류가 발생했습니다.');
+          setLoading(false);
+        }
+      });
+    } catch (error) {
+      console.error('검색 오류:', error);
+      setApiError(error.message || '검색 중 오류가 발생했습니다.');
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (e) => {
     if (e.key === 'Enter') {
-      console.log('검색어:', searchTerm);
+      performSearch();
     }
   };
 
@@ -499,16 +628,21 @@ const MapContainer = () => {
         </S.Description>
         <S.LocationInfo>
           <S.LocationDot />
-          <span>현재 위치: 서울 강남구 역삼동 근처</span>
+          <span>현재 위치: {currentAddress}</span>
         </S.LocationInfo>
         <S.HeaderControls>
-          <S.SearchInput
-            type="text"
-            placeholder="지역·병원명으로 검색"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={handleSearch}
-          />
+          <S.SearchContainer>
+            <S.SearchInput
+              type="text"
+              placeholder="지역·병원명으로 검색"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleSearch}
+            />
+            <S.SearchButton onClick={performSearch} disabled={loading || !searchTerm.trim()}>
+              검색
+            </S.SearchButton>
+          </S.SearchContainer>
           <S.RelocateButton onClick={handleRelocate}>
             내 위치 재탐색
           </S.RelocateButton>
