@@ -119,7 +119,7 @@ const FindPassword = () => {
       state: {
         resetToken,
         memberPhone,
-        memberEmail: "테스트값",
+        memberEmail: emailFromServer,
       },
     });
   } catch (e) {
