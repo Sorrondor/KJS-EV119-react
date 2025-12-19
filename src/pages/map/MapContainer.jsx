@@ -22,6 +22,9 @@ const MapContainer = () => {
   
   const ITEMS_PER_PAGE = 4;
 
+  const [myLocation, setMyLocation] = useState(null);
+
+
   const [center, setCenter] = useState({
     lat: 37.5665,   
     lng: 126.9780,
@@ -381,11 +384,33 @@ const MapContainer = () => {
     }
   };
 
-  const handleRelocate = () => {
+  const getMyLocation = () => {
     if (!navigator.geolocation) {
-      alert('위치 서비스를 사용할 수 없습니다.');
+      alert("위치 정보를 지원하지 않는 브라우저입니다.");
       return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+
+        const next = { lat: latitude, lng: longitude };
+
+        setCenter(next);        
+        setMyLocation(next);    
+
+        console.log("현재위치", latitude, longitude);
+      },
+      (error) => {
+        console.error("위치 가져오기 실패", error);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
+
+  const handleRelocate = () => {
+    getMyLocation();
+    console.log('위치 재탐색');
 
     // 위치 재탐색 시 더 정확한 위치를 얻기 위해 watchPosition 사용
     let watchId = null;

@@ -2,11 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UserHeader from '../../components/header/UserHeader';
 import * as S from './style';
+import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
 
 const RouteGuidance = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [routeInfo, setRouteInfo] = useState(null);
+  
+  const [loading, error] = useKakaoLoader({
+    appkey: process.env.REACT_APP_KAKAO_KEY,
+    libraries: ['services'],
+  });
+
+  const [center, setCenter] = useState({
+    lat: 37.5665,
+    lng: 126.9790,
+  });
+
+
 
   const emergencyRooms = {
     1: {
@@ -14,21 +27,27 @@ const RouteGuidance = () => {
       address: '서울 강남구 테헤란로 123',
       distance: '0.8 km',
       time: '도보 약 10분',
-      carTime: '차량 약 3분'
+      carTime: '차량 약 3분',
+      lat: 37.501022,
+      lng: 127.036884,
     },
     2: {
       name: '역삼성모병원 응급실',
       address: '서울 강남구 역삼로 45',
       distance: '1.4 km',
       time: '도보 약 18분',
-      carTime: '차량 약 5분'
+      carTime: '차량 약 5분',
+      lat: 37.5005,
+      lng: 127.0300,
     },
     3: {
       name: '한빛대학교병원 응급센터',
       address: '서울 서초구 서초대로 201',
       distance: '2.7 km',
       time: '도보 약 35분',
-      carTime: '차량 약 10분'
+      carTime: '차량 약 10분',
+      lat: 37.4930,
+      lng: 127.0150,
     }
   };
 
@@ -39,6 +58,11 @@ const RouteGuidance = () => {
         ...selectedRoom,
         currentLocation: '서울 강남구 역삼동 근처',
         routeType: 'walking' // 'walking' or 'driving'
+      });
+
+      setCenter({
+        lat: selectedRoom.lat,
+        lng: selectedRoom.lng,
       });
     }
   }, [id]);
@@ -54,6 +78,11 @@ const RouteGuidance = () => {
   const handleStartNavigation = () => {
     // Navigation 페이지로 이동
     navigate(`/main/navigation/${id}`);
+    // 실제 네비게이션 앱 연동
+    const url = `https://map.kakao.com/link/to/${encodeURIComponent(
+      routeInfo.name
+    )},${routeInfo.lat},${routeInfo.lng}`;
+    window.open(url, '_blank');
   };
 
   const handleToggleRoute = () => {
@@ -122,9 +151,13 @@ const RouteGuidance = () => {
 
         <S.MapArea>
           <S.MapPlaceholder>
-            <S.MapInstruction>
-              지도가 여기에 표시됩니다
-            </S.MapInstruction>
+            {loading && <div>지도를 불러오는 중입니다...</div>}
+            {error && <div>지도를 불러오는 도중 문제가 발생했습니다.</div>}
+            {!loading && !error && (
+              <Map center={center} style={{width: '100%', height: '100%'}} level={3}>
+                <MapMarker position={center}/>
+              </Map>
+            )}
           </S.MapPlaceholder>
         </S.MapArea>
 
