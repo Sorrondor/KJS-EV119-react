@@ -10,6 +10,7 @@ const ResetPassword = () => {
 
   const resetToken = state?.resetToken || '';
   const memberPhone = state?.memberPhone || '';
+  const memberEmail = state?.memberEmail || '';
 
   const [newPassword, setNewPassword] = useState('');
   const [newPassword2, setNewPassword2] = useState('');
@@ -18,10 +19,20 @@ const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+  console.log("reset state json:", JSON.stringify(state));
+  console.log("history state:", window.history.state);
+}, [state]);
+
+  useEffect(() => {
     if (!resetToken) {
       setError('인증 정보가 없습니다. 비밀번호 찾기부터 다시 진행해주세요.');
     }
   }, [resetToken]);
+
+  useEffect(() => {
+  console.log("reset state:", state);
+}, [state]);
+
 
   const handleSubmit = async () => {
     setError('');
@@ -94,8 +105,8 @@ const ResetPassword = () => {
         <S.FormCard>
           <S.FormTitle>비밀번호 재설정</S.FormTitle>
           <S.FormSubtitle>
-            {memberPhone
-              ? `${memberPhone} 계정의 새 비밀번호를 설정해주세요`
+            {memberEmail
+              ? `${memberEmail} 계정의 새 비밀번호를 설정해주세요`
               : '새 비밀번호를 설정해주세요'}
           </S.FormSubtitle>
 
