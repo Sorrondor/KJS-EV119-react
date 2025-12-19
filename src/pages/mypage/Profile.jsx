@@ -49,9 +49,9 @@ const Profile = () => {
 
     if (!formData.memberPhone.trim()) {
       newErrors.memberPhone = "전화번호를 입력해주세요.";
-    } else if (!/^010-\d{4}-\d{4}$/.test(formData.memberPhone)) {
+    } else if (!/^010\d{4}\d{4}$/.test(formData.memberPhone)) {
       newErrors.memberPhone =
-        "올바른 전화번호 형식이 아닙니다. (010-0000-0000)";
+        "올바른 전화번호 형식이 아닙니다. (01000000000 숫자만 입력)";
     }
 
     setErrors(newErrors);
@@ -180,7 +180,7 @@ const Profile = () => {
                   name="memberPhone"
                   value={formData.memberPhone}
                   onChange={handleChange}
-                  placeholder="010-0000-0000"
+                  placeholder="01000000000 (숫자만 입력)"
                 />
                 {errors.memberPhone && (
                   <S.FieldError>{errors.memberPhone}</S.FieldError>
