@@ -729,7 +729,7 @@ export const InfoLabel = styled.span`
 
 export const EmptyMessage = styled.div`
   text-align: center;
-  padding: 60px 20px;
+  padding: 10px 0px;
   color: #999999;
   font-size: 15px;
 `;
