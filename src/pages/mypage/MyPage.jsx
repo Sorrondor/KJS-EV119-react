@@ -77,12 +77,12 @@ const MyPage = () => {
         <S.MenuSection>
           <S.MenuTitle>계정 관리</S.MenuTitle>
           <S.MenuList>
-            <S.MenuItem onClick={() => navigate("/main/profile")}>
+            <S.MenuItem onClick={() => navigate("/mypage/profile")}>
               <S.MenuIcon>📝</S.MenuIcon>
               <S.MenuText>회원정보 수정</S.MenuText>
               <S.MenuArrow>›</S.MenuArrow>
             </S.MenuItem>
-            <S.MenuItem onClick={() => navigate("/main/profile")}>
+            <S.MenuItem onClick={() => navigate("/mypage/change-password")}>
               <S.MenuIcon>🔒</S.MenuIcon>
               <S.MenuText>비밀번호 변경</S.MenuText>
               <S.MenuArrow>›</S.MenuArrow>
@@ -93,25 +93,27 @@ const MyPage = () => {
         <S.MenuSection>
           <S.MenuTitle>건강정보 관리</S.MenuTitle>
           <S.MenuList>
-            <S.MenuItem onClick={() => navigate(`/main/health`)}>
+            <S.MenuItem onClick={() => navigate(`/mypage/health`)}>
               <S.MenuIcon>🏥</S.MenuIcon>
               <S.MenuText>건강정보 조회/수정</S.MenuText>
               <S.MenuArrow>›</S.MenuArrow>
             </S.MenuItem>
             <S.MenuItem
-              onClick={() => navigate(`/main/health?TabName=medication`)}>
+              onClick={() => navigate(`/mypage/health?TabName=medication`)}>
               <S.MenuIcon>💊</S.MenuIcon>
               <S.MenuText>복용 중인 약물</S.MenuText>
               <S.MenuArrow>›</S.MenuArrow>
             </S.MenuItem>
             <S.MenuItem
-              onClick={() => navigate(`/main/health?TabName=allergy`)}>
+              onClick={() => navigate(`/mypage/health?TabName=allergy`)}>
               <S.MenuIcon>⚠️</S.MenuIcon>
               <S.MenuText>알레르기 정보</S.MenuText>
               <S.MenuArrow>›</S.MenuArrow>
             </S.MenuItem>
             <S.MenuItem
-              onClick={() => navigate(`/main/health?TabName=emergencyPhones`)}>
+              onClick={() =>
+                navigate(`/mypage/health?TabName=emergencyPhones`)
+              }>
               <S.MenuIcon>📞</S.MenuIcon>
               <S.MenuText>응급연락처</S.MenuText>
               <S.MenuArrow>›</S.MenuArrow>
@@ -122,7 +124,7 @@ const MyPage = () => {
         <S.MenuSection>
           <S.MenuTitle>병원 방문 이력</S.MenuTitle>
           <S.MenuList>
-            <S.MenuItem onClick={() => navigate("/main/visit-history")}>
+            <S.MenuItem onClick={() => navigate("/mypage/visit-history")}>
               <S.MenuIcon>📋</S.MenuIcon>
               <S.MenuText>과거 병원방문 이력</S.MenuText>
               <S.MenuArrow>›</S.MenuArrow>
