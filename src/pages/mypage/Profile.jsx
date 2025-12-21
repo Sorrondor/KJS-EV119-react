@@ -1,11 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as S from "./style";
+import { useMyPageLayout } from "./MyPageLayoutContext";
+
+const API_BASE_URL =
+  process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { setTitle } = useMyPageLayout();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    setTitle("회원정보");
+    return () => {
+      setTitle("마이페이지");
+    };
+  }, [setTitle]);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("member"));
@@ -18,7 +31,43 @@ const Profile = () => {
     }
   }, []);
 
-  const [errors, setErrors] = useState({});
+  const formatPhoneNumber = (phoneNumber) => {
+    if (!phoneNumber) return "";
+    const numbers = phoneNumber.replace(/\D/g, "");
+    if (numbers.length === 0) return "";
+
+    const limitedNumbers = numbers.slice(0, 11);
+
+    if (limitedNumbers.length <= 3) {
+      return limitedNumbers;
+    } else if (limitedNumbers.length <= 7) {
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3)}`;
+    } else {
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(
+        3,
+        7
+      )}-${limitedNumbers.slice(7)}`;
+    }
+  };
+
+  const handlePhoneNumberChange = (e) => {
+    const value = e.target.value;
+    const numbers = value.replace(/\D/g, "");
+
+    if (numbers.length > 0) {
+      if (!numbers.startsWith("0")) {
+        return;
+      }
+      if (numbers.length >= 3 && !numbers.startsWith("010")) {
+        return;
+      }
+    }
+
+    const limitedNumbers = numbers.slice(0, 11);
+    handleChange({
+      target: { name: "memberPhone", value: limitedNumbers },
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,11 +107,8 @@ const Profile = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const privateUrl =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
-
   const updateUserData = async (newData) => {
-    const response = await fetch(`${privateUrl}/my-page/edit`, {
+    const response = await fetch(`${API_BASE_URL}/my-page/edit`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -85,7 +131,6 @@ const Profile = () => {
     }
 
     try {
-      // 회원정보 수정 API 호출
       const updatedUser = await updateUserData(formData);
       setFormData({
         memberName: updatedUser.memberName || "-",
@@ -100,7 +145,6 @@ const Profile = () => {
   };
 
   const handleCancel = () => {
-    // 원래 데이터로 복원
     const user = JSON.parse(localStorage.getItem("member"));
     if (user) {
       setFormData({
@@ -114,92 +158,82 @@ const Profile = () => {
   };
 
   return (
-    <S.Container>
-      <S.Header>
-        <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
-        <S.Title>회원정보</S.Title>
-      </S.Header>
-
-      <S.Content>
-        <S.ProfileSection>
-          <S.ProfileImage>
-            <S.ProfileIcon>👤</S.ProfileIcon>
-          </S.ProfileImage>
-          {!isEditing && (
-            <S.EditButton onClick={() => setIsEditing(true)}>수정</S.EditButton>
-          )}
-        </S.ProfileSection>
-
-        <S.FormSection>
-          <S.InputGroup>
-            <S.Label>이름</S.Label>
-            {isEditing ? (
-              <>
-                <S.Input
-                  type="text"
-                  name="memberName"
-                  value={formData.memberName}
-                  onChange={handleChange}
-                  placeholder="이름을 입력하세요"
-                />
-                {errors.memberName && (
-                  <S.FieldError>{errors.memberName}</S.FieldError>
-                )}
-              </>
-            ) : (
-              <S.InfoValue>{formData.memberName}</S.InfoValue>
+    <S.FormSection>
+      {!isEditing && (
+        <S.EditButton onClick={() => setIsEditing(true)}>수정</S.EditButton>
+      )}
+      <S.InputGroup>
+        <S.Label>이름</S.Label>
+        {isEditing ? (
+          <>
+            <S.Input
+              type="text"
+              name="memberName"
+              value={formData.memberName}
+              onChange={handleChange}
+              placeholder="이름을 입력하세요"
+            />
+            {errors.memberName && (
+              <S.FieldError>{errors.memberName}</S.FieldError>
             )}
-          </S.InputGroup>
+          </>
+        ) : (
+          <S.InfoValue>{formData.memberName}</S.InfoValue>
+        )}
+      </S.InputGroup>
 
-          <S.InputGroup>
-            <S.Label>이메일</S.Label>
-            {isEditing ? (
-              <>
-                <S.Input
-                  type="email"
-                  name="memberEmail"
-                  value={formData.memberEmail}
-                  onChange={handleChange}
-                  placeholder="이메일을 입력하세요"
-                />
-                {errors.memberEmail && (
-                  <S.FieldError>{errors.memberEmail}</S.FieldError>
-                )}
-              </>
-            ) : (
-              <S.InfoValue>{formData.memberEmail}</S.InfoValue>
+      <S.InputGroup>
+        <S.Label>이메일</S.Label>
+        {isEditing ? (
+          <>
+            <S.Input
+              type="email"
+              name="memberEmail"
+              value={formData.memberEmail}
+              onChange={handleChange}
+              placeholder="이메일을 입력하세요"
+            />
+            {errors.memberEmail && (
+              <S.FieldError>{errors.memberEmail}</S.FieldError>
             )}
-          </S.InputGroup>
+          </>
+        ) : (
+          <S.InfoValue>{formData.memberEmail}</S.InfoValue>
+        )}
+      </S.InputGroup>
 
-          <S.InputGroup>
-            <S.Label>전화번호</S.Label>
-            {isEditing ? (
-              <>
-                <S.Input
-                  type="tel"
-                  name="memberPhone"
-                  value={formData.memberPhone}
-                  onChange={handleChange}
-                  placeholder="01000000000 (숫자만 입력)"
-                />
-                {errors.memberPhone && (
-                  <S.FieldError>{errors.memberPhone}</S.FieldError>
-                )}
-              </>
-            ) : (
-              <S.InfoValue>{formData.memberPhone}</S.InfoValue>
+      <S.InputGroup>
+        <S.Label>전화번호</S.Label>
+        {isEditing ? (
+          <>
+            <S.Input
+              type="tel"
+              name="memberPhone"
+              value={formatPhoneNumber(formData.memberPhone || "")}
+              onChange={handlePhoneNumberChange}
+              placeholder="010-0000-0000"
+              maxLength={13}
+            />
+            {errors.memberPhone && (
+              <S.FieldError>{errors.memberPhone}</S.FieldError>
             )}
-          </S.InputGroup>
+          </>
+        ) : (
+          <S.InfoValue>
+            {formData.memberPhone
+              ? formatPhoneNumber(formData.memberPhone)
+              : "-"}
+          </S.InfoValue>
+        )}
+      </S.InputGroup>
 
-          {isEditing && (
-            <S.ButtonGroup>
-              <S.CancelButton onClick={handleCancel}>취소</S.CancelButton>
-              <S.SaveButton onClick={handleSave}>저장</S.SaveButton>
-            </S.ButtonGroup>
-          )}
-        </S.FormSection>
-      </S.Content>
-    </S.Container>
+      {isEditing && (
+        <S.ButtonGroup>
+          <S.CancelButton onClick={handleCancel}>취소</S.CancelButton>
+          <S.SaveButton onClick={handleSave}>저장</S.SaveButton>
+        </S.ButtonGroup>
+      )}
+    </S.FormSection>
   );
 };
 
