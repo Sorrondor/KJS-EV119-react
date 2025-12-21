@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import * as S from "./style";
 
 const API_BASE_URL =
@@ -36,8 +36,14 @@ const TABS = [
 
 const HealthInfo = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState("basic");
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabFromUrl = searchParams.get("TabName");
+    return tabFromUrl && TABS.some((tab) => tab.id === tabFromUrl)
+      ? tabFromUrl
+      : "basic";
+  });
   const [healthData, setHealthData] = useState({
     basic: {
       bloodRh: "-",
@@ -472,6 +478,14 @@ const HealthInfo = () => {
     fetchAllData();
   }, [fetchAllData]);
 
+  // URL 쿼리 파라미터 변경 시 탭 업데이트
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("TabName");
+    if (tabFromUrl && TABS.some((tab) => tab.id === tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
   return (
     <S.Container>
       <S.Header>
@@ -485,7 +499,11 @@ const HealthInfo = () => {
             <S.Tab
               key={tab.id}
               $active={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}>
+              onClick={() => {
+                setActiveTab(tab.id);
+                // URL 쿼리 파라미터도 업데이트
+                navigate(`/main/health?TabName=${tab.id}`, { replace: true });
+              }}>
               <S.TabIcon>{tab.icon}</S.TabIcon>
               <S.TabLabel>{tab.label}</S.TabLabel>
             </S.Tab>
