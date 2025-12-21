@@ -23,6 +23,14 @@ const VisitHistory = () => {
   const privateUrl =
     process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
 
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     const getVisitedList = async () => {
       try {
@@ -133,10 +141,16 @@ const VisitHistory = () => {
     }
   };
 
-  const filteredHistory =
+  const filteredHistory = (
     filter === "all"
       ? visitHistory
-      : visitHistory.filter((visit) => visit.visitedType === filter);
+      : visitHistory.filter((visit) => visit.visitedType === filter)
+  ).sort((a, b) => {
+    // 날짜 기준 내림차순 정렬 (최신 날짜가 맨 위)
+    const dateA = new Date(a.visitedDate);
+    const dateB = new Date(b.visitedDate);
+    return dateB - dateA;
+  });
 
   const getTypeLabel = (visitedType) => {
     switch (visitedType) {
@@ -162,6 +176,11 @@ const VisitHistory = () => {
       default:
         return "#666666";
     }
+  };
+
+  const formatDateOnly = (dateString) => {
+    if (!dateString) return "";
+    return dateString.split("T")[0];
   };
 
   return (
@@ -209,6 +228,7 @@ const VisitHistory = () => {
               <S.Input
                 type="date"
                 value={newVisit.visitedDate}
+                max={getTodayDate()}
                 onChange={(e) =>
                   setNewVisit({ ...newVisit, visitedDate: e.target.value })
                 }
@@ -316,7 +336,9 @@ const VisitHistory = () => {
             filteredHistory.map((visit, index) => (
               <S.HistoryCard key={index}>
                 <S.HistoryHeader>
-                  <S.HistoryDate>{visit.visitedDate}</S.HistoryDate>
+                  <S.HistoryDate>
+                    {formatDateOnly(visit.visitedDate)}
+                  </S.HistoryDate>
                   <S.TypeBadge $color={getTypeColor(visit.visitedType)}>
                     {getTypeLabel(visit.visitedType)}
                   </S.TypeBadge>
