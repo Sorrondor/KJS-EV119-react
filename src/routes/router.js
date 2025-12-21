@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import Intro from "../pages/intro/Intro";
 import MapContainer from "../pages/map/MapContainer";
 import EmergencyRoomDetail from "../pages/emergencyRoom/EmergencyRoomDetail";
@@ -15,6 +15,7 @@ import Navigation from "../pages/navigation/Navigation";
 import FindPassword from "../pages/auth/FindPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import ChangePassword from "../pages/mypage/ChangePassword";
+import MyPageLayOut from "../pages/mypage/MyPageLayOut";
 
 const router = createBrowserRouter([
   {
@@ -75,7 +76,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/mypage",
-    element: <Outlet />,
+    element: <MyPageLayOut />,
     children: [
       {
         index: true,

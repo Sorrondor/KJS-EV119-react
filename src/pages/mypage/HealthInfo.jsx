@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import * as S from "./style";
+import { useMyPageLayout } from "./MyPageLayoutContext";
 
 const API_BASE_URL =
   process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
@@ -37,6 +38,7 @@ const TABS = [
 const HealthInfo = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { setTitle, setTopContent } = useMyPageLayout();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const tabFromUrl = searchParams.get("TabName");
@@ -478,7 +480,30 @@ const HealthInfo = () => {
     fetchAllData();
   }, [fetchAllData]);
 
-  // URL 쿼리 파라미터 변경 시 탭 업데이트
+  useEffect(() => {
+    setTitle("건강정보 관리");
+    setTopContent(
+      <S.TabContainer>
+        {TABS.map((tab) => (
+          <S.Tab
+            key={tab.id}
+            $active={activeTab === tab.id}
+            onClick={() => {
+              setActiveTab(tab.id);
+              navigate(`/mypage/health?TabName=${tab.id}`, { replace: true });
+            }}>
+            <S.TabIcon>{tab.icon}</S.TabIcon>
+            <S.TabLabel>{tab.label}</S.TabLabel>
+          </S.Tab>
+        ))}
+      </S.TabContainer>
+    );
+    return () => {
+      setTitle("마이페이지");
+      setTopContent(null);
+    };
+  }, [setTitle, setTopContent, activeTab, navigate]);
+
   useEffect(() => {
     const tabFromUrl = searchParams.get("TabName");
     if (tabFromUrl && TABS.some((tab) => tab.id === tabFromUrl)) {
@@ -487,425 +512,397 @@ const HealthInfo = () => {
   }, [searchParams]);
 
   return (
-    <S.Container>
-      <S.Header>
-        <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
-        <S.Title>건강정보 관리</S.Title>
-      </S.Header>
-
-      <S.Content>
-        <S.TabContainer>
-          {TABS.map((tab) => (
-            <S.Tab
-              key={tab.id}
-              $active={activeTab === tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                // URL 쿼리 파라미터도 업데이트
-                navigate(`/main/health?TabName=${tab.id}`, { replace: true });
-              }}>
-              <S.TabIcon>{tab.icon}</S.TabIcon>
-              <S.TabLabel>{tab.label}</S.TabLabel>
-            </S.Tab>
-          ))}
-        </S.TabContainer>
-
-        <S.HealthSection>
-          {!isEditing && (
-            <S.EditButton onClick={() => setIsEditing(true)}>수정</S.EditButton>
-          )}
-
-          {activeTab === "basic" && (
-            <S.BasicInfoSection>
-              <S.InputGroup>
-                <S.Label>혈액형</S.Label>
-                {isEditing ? (
-                  <>
-                    <S.Select
-                      value={formData.basic.bloodRh || ""}
-                      onChange={(e) =>
-                        handleChange("basic", "bloodRh", e.target.value)
-                      }>
-                      {BLOOD_RH_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </S.Select>
-                    <S.Select
-                      value={formData.basic.bloodAbo || ""}
-                      onChange={(e) =>
-                        handleChange("basic", "bloodAbo", e.target.value)
-                      }>
-                      {BLOOD_ABO_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </S.Select>
-                  </>
-                ) : (
-                  <S.InfoValue>
-                    {formData.basic.bloodRh !== "-" && formData.basic.bloodAbo
-                      ? `${formData.basic.bloodRh} ${formData.basic.bloodAbo}형`
-                      : "미등록"}
-                  </S.InfoValue>
-                )}
-              </S.InputGroup>
-
-              <S.InputGroup>
-                <S.Label>키 (cm)</S.Label>
-                {isEditing ? (
-                  <S.Input
-                    type="number"
-                    value={formData.basic.height || ""}
+    <>
+      <S.HealthSection>
+        {!isEditing && (
+          <S.EditButton onClick={() => setIsEditing(true)}>수정</S.EditButton>
+        )}
+        {activeTab === "basic" && (
+          <S.BasicInfoSection>
+            <S.InputGroup>
+              <S.Label>혈액형</S.Label>
+              {isEditing ? (
+                <>
+                  <S.Select
+                    value={formData.basic.bloodRh || ""}
                     onChange={(e) =>
-                      handleChange("basic", "height", e.target.value)
-                    }
-                    placeholder="키를 입력하세요"
-                  />
-                ) : (
-                  <S.InfoValue>
-                    {formData.basic.height
-                      ? `${formData.basic.height} cm`
-                      : "미등록"}
-                  </S.InfoValue>
-                )}
-              </S.InputGroup>
-
-              <S.InputGroup>
-                <S.Label>몸무게 (kg)</S.Label>
-                {isEditing ? (
-                  <S.Input
-                    type="number"
-                    value={formData.basic.weight || ""}
+                      handleChange("basic", "bloodRh", e.target.value)
+                    }>
+                    {BLOOD_RH_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </S.Select>
+                  <S.Select
+                    value={formData.basic.bloodAbo || ""}
                     onChange={(e) =>
-                      handleChange("basic", "weight", e.target.value)
-                    }
-                    placeholder="몸무게를 입력하세요"
-                  />
-                ) : (
-                  <S.InfoValue>
-                    {formData.basic.weight
-                      ? `${formData.basic.weight} kg`
-                      : "미등록"}
-                  </S.InfoValue>
-                )}
-              </S.InputGroup>
+                      handleChange("basic", "bloodAbo", e.target.value)
+                    }>
+                    {BLOOD_ABO_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </S.Select>
+                </>
+              ) : (
+                <S.InfoValue>
+                  {formData.basic.bloodRh !== "-" && formData.basic.bloodAbo
+                    ? `${formData.basic.bloodRh} ${formData.basic.bloodAbo}형`
+                    : "미등록"}
+                </S.InfoValue>
+              )}
+            </S.InputGroup>
 
-              <S.InputGroup>
-                <S.Label>기저질환</S.Label>
-                {isEditing && (
-                  <S.TagInput
-                    type="text"
-                    placeholder="기저질환을 입력하고 Enter를 누르세요"
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const value = e.target.value.trim();
-                        if (value) {
-                          const existingNames =
-                            formData.basic.diseases.map(extractDiseaseName);
-                          if (!existingNames.includes(value)) {
-                            handleChange("basic", "diseases", [
-                              ...formData.basic.diseases,
-                              value,
-                            ]);
-                            e.target.value = "";
-                          } else {
-                            alert("이미 등록된 기저질환입니다.");
-                          }
+            <S.InputGroup>
+              <S.Label>키 (cm)</S.Label>
+              {isEditing ? (
+                <S.Input
+                  type="number"
+                  value={formData.basic.height || ""}
+                  onChange={(e) =>
+                    handleChange("basic", "height", e.target.value)
+                  }
+                  placeholder="키를 입력하세요"
+                />
+              ) : (
+                <S.InfoValue>
+                  {formData.basic.height
+                    ? `${formData.basic.height} cm`
+                    : "미등록"}
+                </S.InfoValue>
+              )}
+            </S.InputGroup>
+
+            <S.InputGroup>
+              <S.Label>몸무게 (kg)</S.Label>
+              {isEditing ? (
+                <S.Input
+                  type="number"
+                  value={formData.basic.weight || ""}
+                  onChange={(e) =>
+                    handleChange("basic", "weight", e.target.value)
+                  }
+                  placeholder="몸무게를 입력하세요"
+                />
+              ) : (
+                <S.InfoValue>
+                  {formData.basic.weight
+                    ? `${formData.basic.weight} kg`
+                    : "미등록"}
+                </S.InfoValue>
+              )}
+            </S.InputGroup>
+
+            <S.InputGroup>
+              <S.Label>기저질환</S.Label>
+              {isEditing && (
+                <S.TagInput
+                  type="text"
+                  placeholder="기저질환을 입력하고 Enter를 누르세요"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const value = e.target.value.trim();
+                      if (value) {
+                        const existingNames =
+                          formData.basic.diseases.map(extractDiseaseName);
+                        if (!existingNames.includes(value)) {
+                          handleChange("basic", "diseases", [
+                            ...formData.basic.diseases,
+                            value,
+                          ]);
+                          e.target.value = "";
+                        } else {
+                          alert("이미 등록된 기저질환입니다.");
                         }
                       }
-                    }}
-                  />
+                    }
+                  }}
+                />
+              )}
+              <S.TagContainer>
+                {formData.basic.diseases.length === 0 && !isEditing ? (
+                  <S.EmptyMessage>등록된 기저질환이 없습니다.</S.EmptyMessage>
+                ) : (
+                  formData.basic.diseases.map((disease, idx) => {
+                    const diseaseName = extractDiseaseName(disease);
+                    return (
+                      <S.Tag
+                        key={
+                          typeof disease === "object" && disease.id
+                            ? `disease-${disease.id}`
+                            : `disease-new-${idx}`
+                        }>
+                        {diseaseName}
+                        {isEditing && (
+                          <S.TagRemove
+                            onClick={() => {
+                              handleChange(
+                                "basic",
+                                "diseases",
+                                formData.basic.diseases.filter(
+                                  (_, i) => i !== idx
+                                )
+                              );
+                            }}>
+                            ×
+                          </S.TagRemove>
+                        )}
+                      </S.Tag>
+                    );
+                  })
                 )}
-                <S.TagContainer>
-                  {formData.basic.diseases.length === 0 && !isEditing ? (
-                    <S.EmptyMessage>등록된 기저질환이 없습니다.</S.EmptyMessage>
+              </S.TagContainer>
+            </S.InputGroup>
+          </S.BasicInfoSection>
+        )}
+
+        {activeTab === "medication" && (
+          <S.MedicationSection>
+            {formData.medication.length === 0 && !isEditing ? (
+              <S.EmptyMessage>등록된 복용약물이 없습니다.</S.EmptyMessage>
+            ) : (
+              formData.medication.map((med, idx) => (
+                <S.MedicationCard key={med.id || `med-${idx}`}>
+                  {isEditing ? (
+                    <>
+                      <S.InputGroup>
+                        <S.Label>약물명</S.Label>
+                        <S.Input
+                          value={med.medicationName || ""}
+                          onChange={(e) =>
+                            handleUpdateItem(
+                              "medication",
+                              idx,
+                              "medicationName",
+                              e.target.value
+                            )
+                          }
+                          placeholder="약물명을 입력하세요"
+                        />
+                      </S.InputGroup>
+                      <S.InputGroup>
+                        <S.Label>용법</S.Label>
+                        <S.Input
+                          value={med.medicationUsage || ""}
+                          onChange={(e) =>
+                            handleUpdateItem(
+                              "medication",
+                              idx,
+                              "medicationUsage",
+                              e.target.value
+                            )
+                          }
+                          placeholder="예: 1일 1회"
+                        />
+                      </S.InputGroup>
+                      <S.InputGroup>
+                        <S.Label>복용시간</S.Label>
+                        <S.Input
+                          value={med.medicationTakingtime || ""}
+                          onChange={(e) =>
+                            handleUpdateItem(
+                              "medication",
+                              idx,
+                              "medicationTakingtime",
+                              e.target.value
+                            )
+                          }
+                          placeholder="예: 아침 식후"
+                        />
+                      </S.InputGroup>
+                      <S.RemoveButton
+                        onClick={() => handleRemoveItem("medication", idx)}>
+                        삭제
+                      </S.RemoveButton>
+                    </>
                   ) : (
-                    formData.basic.diseases.map((disease, idx) => {
-                      const diseaseName = extractDiseaseName(disease);
-                      return (
-                        <S.Tag
-                          key={
-                            typeof disease === "object" && disease.id
-                              ? `disease-${disease.id}`
-                              : `disease-new-${idx}`
-                          }>
-                          {diseaseName}
-                          {isEditing && (
-                            <S.TagRemove
-                              onClick={() => {
-                                handleChange(
-                                  "basic",
-                                  "diseases",
-                                  formData.basic.diseases.filter(
-                                    (_, i) => i !== idx
-                                  )
-                                );
-                              }}>
-                              ×
-                            </S.TagRemove>
-                          )}
-                        </S.Tag>
-                      );
-                    })
+                    <>
+                      <S.MedicationName>{med.medicationName}</S.MedicationName>
+                      <S.MedicationInfo>
+                        {med.medicationUsage} - {med.medicationTakingtime}
+                      </S.MedicationInfo>
+                    </>
                   )}
-                </S.TagContainer>
-              </S.InputGroup>
-            </S.BasicInfoSection>
-          )}
+                </S.MedicationCard>
+              ))
+            )}
+            {isEditing && (
+              <S.AddButton onClick={() => handleAddItem("medication")}>
+                + 약물 추가
+              </S.AddButton>
+            )}
+          </S.MedicationSection>
+        )}
 
-          {activeTab === "medication" && (
-            <S.MedicationSection>
-              {formData.medication.length === 0 && !isEditing ? (
-                <S.EmptyMessage>등록된 복용약물이 없습니다.</S.EmptyMessage>
-              ) : (
-                formData.medication.map((med, idx) => (
-                  <S.MedicationCard key={med.id || `med-${idx}`}>
-                    {isEditing ? (
-                      <>
-                        <S.InputGroup>
-                          <S.Label>약물명</S.Label>
-                          <S.Input
-                            value={med.medicationName || ""}
-                            onChange={(e) =>
-                              handleUpdateItem(
-                                "medication",
-                                idx,
-                                "medicationName",
-                                e.target.value
-                              )
-                            }
-                            placeholder="약물명을 입력하세요"
-                          />
-                        </S.InputGroup>
-                        <S.InputGroup>
-                          <S.Label>용법</S.Label>
-                          <S.Input
-                            value={med.medicationUsage || ""}
-                            onChange={(e) =>
-                              handleUpdateItem(
-                                "medication",
-                                idx,
-                                "medicationUsage",
-                                e.target.value
-                              )
-                            }
-                            placeholder="예: 1일 1회"
-                          />
-                        </S.InputGroup>
-                        <S.InputGroup>
-                          <S.Label>복용시간</S.Label>
-                          <S.Input
-                            value={med.medicationTakingtime || ""}
-                            onChange={(e) =>
-                              handleUpdateItem(
-                                "medication",
-                                idx,
-                                "medicationTakingtime",
-                                e.target.value
-                              )
-                            }
-                            placeholder="예: 아침 식후"
-                          />
-                        </S.InputGroup>
-                        <S.RemoveButton
-                          onClick={() => handleRemoveItem("medication", idx)}>
-                          삭제
-                        </S.RemoveButton>
-                      </>
-                    ) : (
-                      <>
-                        <S.MedicationName>
-                          {med.medicationName}
-                        </S.MedicationName>
-                        <S.MedicationInfo>
-                          {med.medicationUsage} - {med.medicationTakingtime}
-                        </S.MedicationInfo>
-                      </>
-                    )}
-                  </S.MedicationCard>
-                ))
-              )}
-              {isEditing && (
-                <S.AddButton onClick={() => handleAddItem("medication")}>
-                  + 약물 추가
-                </S.AddButton>
-              )}
-            </S.MedicationSection>
-          )}
-
-          {activeTab === "allergy" && (
-            <S.AllergySection>
-              {formData.allergy.length === 0 && !isEditing ? (
-                <S.EmptyMessage>등록된 알레르기가 없습니다.</S.EmptyMessage>
-              ) : (
-                formData.allergy.map((item, idx) => (
-                  <S.AllergyCard key={item.id || `allergy-${idx}`}>
-                    {isEditing ? (
-                      <>
-                        <S.InputGroup>
-                          <S.Label>알레르기 유형</S.Label>
-                          <S.Select
-                            value={item.allergyType || ""}
-                            onChange={(e) =>
-                              handleUpdateItem(
-                                "allergy",
-                                idx,
-                                "allergyType",
-                                e.target.value
-                              )
-                            }>
-                            {ALLERGY_TYPE_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </S.Select>
-                        </S.InputGroup>
-                        <S.InputGroup>
-                          <S.Label>알레르기 항목</S.Label>
-                          <S.Input
-                            value={item.allergyName || ""}
-                            onChange={(e) =>
-                              handleUpdateItem(
-                                "allergy",
-                                idx,
-                                "allergyName",
-                                e.target.value
-                              )
-                            }
-                            placeholder="알레르기 항목을 입력하세요"
-                          />
-                        </S.InputGroup>
-                        <S.RemoveButton
-                          onClick={() => handleRemoveItem("allergy", idx)}>
-                          삭제
-                        </S.RemoveButton>
-                      </>
-                    ) : (
-                      <>
-                        <S.AllergyType>
-                          {item.allergyType || "미분류"}
-                        </S.AllergyType>
-                        <S.AllergyName>{item.allergyName}</S.AllergyName>
-                      </>
-                    )}
-                  </S.AllergyCard>
-                ))
-              )}
-              {isEditing && (
-                <S.AddButton onClick={() => handleAddItem("allergy")}>
-                  + 알레르기 추가
-                </S.AddButton>
-              )}
-            </S.AllergySection>
-          )}
-
-          {activeTab === "emergencyPhones" && (
-            <S.EmergencySection>
-              {formData.emergencyPhones.length === 0 && !isEditing ? (
-                <S.EmptyMessage>등록된 응급연락처가 없습니다.</S.EmptyMessage>
-              ) : (
-                formData.emergencyPhones.map((contact, idx) => (
-                  <S.EmergencyCard key={contact.id || `emergency-${idx}`}>
-                    {isEditing ? (
-                      <>
-                        <S.InputGroup>
-                          <S.Label>이름</S.Label>
-                          <S.Input
-                            value={contact.emergencyPhoneName || ""}
-                            onChange={(e) =>
-                              handleUpdateItem(
-                                "emergencyPhones",
-                                idx,
-                                "emergencyPhoneName",
-                                e.target.value
-                              )
-                            }
-                            placeholder="이름을 입력하세요"
-                          />
-                        </S.InputGroup>
-                        <S.InputGroup>
-                          <S.Label>관계</S.Label>
-                          <S.Input
-                            value={contact.emergencyPhoneRelationship || ""}
-                            onChange={(e) =>
-                              handleUpdateItem(
-                                "emergencyPhones",
-                                idx,
-                                "emergencyPhoneRelationship",
-                                e.target.value
-                              )
-                            }
-                            placeholder="관계를 입력하세요"
-                          />
-                        </S.InputGroup>
-                        <S.InputGroup>
-                          <S.Label>전화번호</S.Label>
-                          <S.Input
-                            type="tel"
-                            value={formatPhoneNumber(
-                              contact.emergencyPhoneNumber || ""
-                            )}
-                            onChange={(e) =>
-                              handlePhoneNumberChange(
-                                "emergencyPhones",
-                                idx,
-                                e.target.value
-                              )
-                            }
-                            placeholder="010-0000-0000"
-                            maxLength={13}
-                          />
-                        </S.InputGroup>
-                        <S.RemoveButton
-                          onClick={() =>
-                            handleRemoveItem("emergencyPhones", idx)
+        {activeTab === "allergy" && (
+          <S.AllergySection>
+            {formData.allergy.length === 0 && !isEditing ? (
+              <S.EmptyMessage>등록된 알레르기가 없습니다.</S.EmptyMessage>
+            ) : (
+              formData.allergy.map((item, idx) => (
+                <S.AllergyCard key={item.id || `allergy-${idx}`}>
+                  {isEditing ? (
+                    <>
+                      <S.InputGroup>
+                        <S.Label>알레르기 유형</S.Label>
+                        <S.Select
+                          value={item.allergyType || ""}
+                          onChange={(e) =>
+                            handleUpdateItem(
+                              "allergy",
+                              idx,
+                              "allergyType",
+                              e.target.value
+                            )
                           }>
-                          삭제
-                        </S.RemoveButton>
-                      </>
-                    ) : (
-                      <>
-                        <S.EmergencyName>
-                          {contact.emergencyPhoneName}
-                        </S.EmergencyName>
-                        <S.EmergencyRelation>
-                          {contact.emergencyPhoneRelationship}
-                        </S.EmergencyRelation>
-                        <S.EmergencyPhone
-                          href={`tel:${extractPhoneNumbers(
-                            contact.emergencyPhoneNumber
-                          )}`}>
-                          {formatPhoneNumber(
+                          {ALLERGY_TYPE_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </S.Select>
+                      </S.InputGroup>
+                      <S.InputGroup>
+                        <S.Label>알레르기 항목</S.Label>
+                        <S.Input
+                          value={item.allergyName || ""}
+                          onChange={(e) =>
+                            handleUpdateItem(
+                              "allergy",
+                              idx,
+                              "allergyName",
+                              e.target.value
+                            )
+                          }
+                          placeholder="알레르기 항목을 입력하세요"
+                        />
+                      </S.InputGroup>
+                      <S.RemoveButton
+                        onClick={() => handleRemoveItem("allergy", idx)}>
+                        삭제
+                      </S.RemoveButton>
+                    </>
+                  ) : (
+                    <>
+                      <S.AllergyType>
+                        {item.allergyType || "미분류"}
+                      </S.AllergyType>
+                      <S.AllergyName>{item.allergyName}</S.AllergyName>
+                    </>
+                  )}
+                </S.AllergyCard>
+              ))
+            )}
+            {isEditing && (
+              <S.AddButton onClick={() => handleAddItem("allergy")}>
+                + 알레르기 추가
+              </S.AddButton>
+            )}
+          </S.AllergySection>
+        )}
+
+        {activeTab === "emergencyPhones" && (
+          <S.EmergencySection>
+            {formData.emergencyPhones.length === 0 && !isEditing ? (
+              <S.EmptyMessage>등록된 응급연락처가 없습니다.</S.EmptyMessage>
+            ) : (
+              formData.emergencyPhones.map((contact, idx) => (
+                <S.EmergencyCard key={contact.id || `emergency-${idx}`}>
+                  {isEditing ? (
+                    <>
+                      <S.InputGroup>
+                        <S.Label>이름</S.Label>
+                        <S.Input
+                          value={contact.emergencyPhoneName || ""}
+                          onChange={(e) =>
+                            handleUpdateItem(
+                              "emergencyPhones",
+                              idx,
+                              "emergencyPhoneName",
+                              e.target.value
+                            )
+                          }
+                          placeholder="이름을 입력하세요"
+                        />
+                      </S.InputGroup>
+                      <S.InputGroup>
+                        <S.Label>관계</S.Label>
+                        <S.Input
+                          value={contact.emergencyPhoneRelationship || ""}
+                          onChange={(e) =>
+                            handleUpdateItem(
+                              "emergencyPhones",
+                              idx,
+                              "emergencyPhoneRelationship",
+                              e.target.value
+                            )
+                          }
+                          placeholder="관계를 입력하세요"
+                        />
+                      </S.InputGroup>
+                      <S.InputGroup>
+                        <S.Label>전화번호</S.Label>
+                        <S.Input
+                          type="tel"
+                          value={formatPhoneNumber(
                             contact.emergencyPhoneNumber || ""
                           )}
-                        </S.EmergencyPhone>
-                      </>
-                    )}
-                  </S.EmergencyCard>
-                ))
-              )}
-              {isEditing && (
-                <S.AddButton onClick={() => handleAddItem("emergencyPhones")}>
-                  + 연락처 추가
-                </S.AddButton>
-              )}
-            </S.EmergencySection>
-          )}
+                          onChange={(e) =>
+                            handlePhoneNumberChange(
+                              "emergencyPhones",
+                              idx,
+                              e.target.value
+                            )
+                          }
+                          placeholder="010-0000-0000"
+                          maxLength={13}
+                        />
+                      </S.InputGroup>
+                      <S.RemoveButton
+                        onClick={() =>
+                          handleRemoveItem("emergencyPhones", idx)
+                        }>
+                        삭제
+                      </S.RemoveButton>
+                    </>
+                  ) : (
+                    <>
+                      <S.EmergencyName>
+                        {contact.emergencyPhoneName}
+                      </S.EmergencyName>
+                      <S.EmergencyRelation>
+                        {contact.emergencyPhoneRelationship}
+                      </S.EmergencyRelation>
+                      <S.EmergencyPhone
+                        href={`tel:${extractPhoneNumbers(
+                          contact.emergencyPhoneNumber
+                        )}`}>
+                        {formatPhoneNumber(contact.emergencyPhoneNumber || "")}
+                      </S.EmergencyPhone>
+                    </>
+                  )}
+                </S.EmergencyCard>
+              ))
+            )}
+            {isEditing && (
+              <S.AddButton onClick={() => handleAddItem("emergencyPhones")}>
+                + 연락처 추가
+              </S.AddButton>
+            )}
+          </S.EmergencySection>
+        )}
 
-          {isEditing && (
-            <S.ButtonGroup>
-              <S.CancelButton onClick={handleCancel}>취소</S.CancelButton>
-              <S.SaveButton onClick={handleSave}>저장</S.SaveButton>
-            </S.ButtonGroup>
-          )}
-        </S.HealthSection>
-      </S.Content>
-    </S.Container>
+        {isEditing && (
+          <S.ButtonGroup>
+            <S.CancelButton onClick={handleCancel}>취소</S.CancelButton>
+            <S.SaveButton onClick={handleSave}>저장</S.SaveButton>
+          </S.ButtonGroup>
+        )}
+      </S.HealthSection>
+    </>
   );
 };
 

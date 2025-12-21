@@ -194,6 +194,7 @@ export const FormSection = styled.div`
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: relative;
 `;
 
 export const InputGroup = styled.div`
@@ -732,4 +733,26 @@ export const EmptyMessage = styled.div`
   padding: 10px 0px;
   color: #999999;
   font-size: 15px;
+`;
+
+export const ErrorMessage = styled.div`
+  padding: 12px;
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #cd0b16;
+  text-align: center;
+  margin-top: 8px;
+`;
+
+export const InfoMessage = styled.div`
+  padding: 12px;
+  background-color: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1b5e20;
+  text-align: center;
+  margin-top: 8px;
 `;
