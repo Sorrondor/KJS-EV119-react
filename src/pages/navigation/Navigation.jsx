@@ -3,12 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import UserHeader from '../../components/header/UserHeader';
 import * as S from './style';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:10000';
+
 const Navigation = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [routeInfo, setRouteInfo] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [currentAddress, setCurrentAddress] = useState('위치 정보를 가져오는 중...');
   const [routeType, setRouteType] = useState('driving'); // 'walking' or 'driving'
   const [directions, setDirections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,16 +78,17 @@ const Navigation = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // API에서 가장 가까운 응급실 정보 가져오기
+  // API에서 응급실 정보 가져오기 (id가 있으면 해당 병원, 없으면 가장 가까운 병원)
   useEffect(() => {
     if (!currentLocation) return;
 
-    const fetchNearestEmergencyRoom = async () => {
+    const fetchEmergencyRoom = async () => {
       try {
         setLoading(true);
-        // API 호출: 현재 위치 기반으로 응급실 검색
+        
+        // id가 있으면 해당 병원 찾기, 없으면 가장 가까운 병원 찾기
         const response = await fetch(
-          `http://localhost:10000/api/emergency/search-emergency?lat=${currentLocation.lat}&lon=${currentLocation.lng}&pageNo=1&numOfRows=10`
+          `${BACKEND_URL}/api/emergency/search-emergency?lat=${currentLocation.lat}&lon=${currentLocation.lng}&pageNo=1&numOfRows=100`
         );
         
         if (!response.ok) {
@@ -99,39 +104,121 @@ const Navigation = () => {
           throw new Error('주변 응급실을 찾을 수 없습니다.');
         }
 
-        // distance 기준으로 정렬하여 가장 가까운 병원 선택
-        const sortedItems = [...items].sort((a, b) => {
-          const distA = parseFloat(a.distance || 0);
-          const distB = parseFloat(b.distance || 0);
-          return distA - distB;
-        });
+        let targetRoom = null;
 
-        const nearestRoom = sortedItems[0];
+        // id가 있으면 해당 병원 찾기
+        if (id) {
+          targetRoom = items.find(item => item.hpid === id);
+          if (!targetRoom) {
+            throw new Error('해당 병원을 찾을 수 없습니다.');
+          }
+        } else {
+          // id가 없으면 distance 기준으로 정렬하여 가장 가까운 병원 선택
+          const sortedItems = [...items].sort((a, b) => {
+            const distA = parseFloat(a.distance || 0);
+            const distB = parseFloat(b.distance || 0);
+            return distA - distB;
+          });
+          targetRoom = sortedItems[0];
+        }
 
-        if (nearestRoom && nearestRoom.latitude && nearestRoom.longitude) {
+        if (targetRoom) {
+          const latitude = parseFloat(targetRoom.latitude || targetRoom.wgs84Lat || '0');
+          const longitude = parseFloat(targetRoom.longitude || targetRoom.wgs84Lon || '0');
+          
+          // 거리 계산 (현재 위치와 목적지 간)
+          const calculateDistance = (lat1, lon1, lat2, lon2) => {
+            const R = 6371; // 지구 반지름 (km)
+            const dLat = ((lat2 - lat1) * Math.PI) / 180;
+            const dLon = ((lon2 - lon1) * Math.PI) / 180;
+            const a =
+              Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos((lat1 * Math.PI) / 180) *
+                Math.cos((lat2 * Math.PI) / 180) *
+                Math.sin(dLon / 2) *
+                Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+          };
+
+          const distanceKm = targetRoom.distance 
+            ? parseFloat(targetRoom.distance) 
+            : calculateDistance(currentLocation.lat, currentLocation.lng, latitude, longitude);
+          
+          const distanceText = distanceKm < 1 
+            ? `${Math.round(distanceKm * 1000)}m` 
+            : `${distanceKm.toFixed(2)} km`;
+
           setRouteInfo({
-            name: nearestRoom.dutyName || '응급실',
-            address: nearestRoom.dutyAddr || '',
-            lat: parseFloat(nearestRoom.latitude),
-            lng: parseFloat(nearestRoom.longitude),
-            distance: `${nearestRoom.distance ? nearestRoom.distance.toFixed(2) : '0'} km`,
-            time: '도보 약 10분',
-            carTime: '차량 약 3분'
+            name: targetRoom.dutyName || '응급실',
+            address: targetRoom.dutyAddr || '',
+            lat: latitude,
+            lng: longitude,
+            distance: distanceText,
+            time: distanceKm < 1 ? '도보 약 5분' : distanceKm < 3 ? '도보 약 10분' : '도보 약 20분',
+            carTime: distanceKm < 1 ? '차량 약 3분' : distanceKm < 3 ? '차량 약 5분' : '차량 약 10분'
           });
         } else {
           throw new Error('응급실 위치 정보가 없습니다.');
         }
       } catch (error) {
         console.error('응급실 정보 조회 오류:', error);
-        alert('응급실 정보를 가져오는데 실패했습니다. 다시 시도해주세요.');
+        alert(error.message || '응급실 정보를 가져오는데 실패했습니다. 다시 시도해주세요.');
         navigate(-1);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNearestEmergencyRoom();
-  }, [currentLocation, navigate]);
+    fetchEmergencyRoom();
+  }, [currentLocation, id, navigate]);
+
+  // 좌표를 주소로 변환 (역지오코딩)
+  const getAddressFromCoords = (lat, lng) => {
+    if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+      return;
+    }
+
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    const coord = new window.kakao.maps.LatLng(lat, lng);
+
+    geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const address = result[0];
+        let addressName = '';
+        
+        // 도로명 주소가 있으면 도로명 주소 사용, 없으면 지번 주소 사용
+        if (address.road_address) {
+          addressName = address.road_address.address_name;
+        } else if (address.address) {
+          addressName = address.address.address_name;
+        }
+        
+        if (addressName) {
+          // "서울특별시 강남구 역삼동" 형식에서 "서울 강남구 역삼동 근처" 형식으로 변환
+          const formattedAddress = addressName
+            .replace('서울특별시', '서울')
+            .replace('광역시', '')
+            .replace('특별시', '')
+            .replace('특별자치시', '')
+            .replace('특별자치도', '');
+          
+          setCurrentAddress(formattedAddress);
+        } else {
+          setCurrentAddress('주소를 가져올 수 없습니다.');
+        }
+      } else {
+        setCurrentAddress('주소를 가져올 수 없습니다.');
+      }
+    });
+  };
+
+  // currentLocation이 변경될 때마다 주소 업데이트
+  useEffect(() => {
+    if (currentLocation && currentLocation.lat && currentLocation.lng && kakaoLoaded) {
+      getAddressFromCoords(currentLocation.lat, currentLocation.lng);
+    }
+  }, [currentLocation, kakaoLoaded]);
 
   // 지도 및 경로 표시
   useEffect(() => {
@@ -162,7 +249,8 @@ const Navigation = () => {
     });
 
     const startInfoWindow = new kakao.maps.InfoWindow({
-      content: '<div style="padding:5px;font-size:12px;font-weight:bold;">현재 위치</div>'
+      content: `<div style="padding:8px 12px;font-size:13px;font-weight:bold;min-width:80px;max-width:250px;word-wrap:break-word;white-space:normal;line-height:1.4;text-align:center;">${currentAddress}</div>`,
+      removable: true
     });
     startInfoWindow.open(map, startMarker);
 
@@ -172,7 +260,8 @@ const Navigation = () => {
     });
 
     const endInfoWindow = new kakao.maps.InfoWindow({
-      content: `<div style="padding:5px;font-size:12px;font-weight:bold;">${routeInfo.name}</div>`
+      content: `<div style="padding:8px 12px;font-size:13px;font-weight:bold;min-width:80px;max-width:250px;word-wrap:break-word;white-space:normal;line-height:1.4;text-align:center;">${routeInfo.name}</div>`,
+      removable: true
     });
     endInfoWindow.open(map, endMarker);
 
@@ -305,11 +394,15 @@ const Navigation = () => {
     <S.Container>
       <UserHeader />
       <S.Header>
-        <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
-        <S.Title>네비게이션</S.Title>
+        <S.HeaderContent>
+          <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
+          <S.Title>네비게이션</S.Title>
+        </S.HeaderContent>
       </S.Header>
 
-      <S.Content>
+      <S.MainContent>
+        <S.MainContentWrapper>
+          <S.Content>
         <S.DestinationCard>
           <S.DestinationIcon>🏥</S.DestinationIcon>
           <S.DestinationInfo>
@@ -337,7 +430,7 @@ const Navigation = () => {
           <S.RouteDetails>
             <S.RouteItem>
               <S.RouteLabel>출발지</S.RouteLabel>
-              <S.RouteValue>현재 위치</S.RouteValue>
+              <S.RouteValue>{currentAddress}</S.RouteValue>
             </S.RouteItem>
             <S.RouteArrow>↓</S.RouteArrow>
             <S.RouteItem>
@@ -371,15 +464,19 @@ const Navigation = () => {
             ))}
           </S.DirectionsList>
         )}
-      </S.Content>
+          </S.Content>
+        </S.MainContentWrapper>
+      </S.MainContent>
 
       <S.ActionButtons>
-        <S.PrimaryButton onClick={handleStartKakaoNavigation}>
-          카카오맵 앱으로 네비게이션
-        </S.PrimaryButton>
-        <S.SecondaryButton onClick={handleStartKakaoMap}>
-          카카오맵 웹에서 보기
-        </S.SecondaryButton>
+        <S.ActionButtonsContent>
+          <S.PrimaryButton onClick={handleStartKakaoNavigation}>
+            카카오맵 앱으로 네비게이션
+          </S.PrimaryButton>
+          <S.SecondaryButton onClick={handleStartKakaoMap}>
+            카카오맵 웹에서 보기
+          </S.SecondaryButton>
+        </S.ActionButtonsContent>
       </S.ActionButtons>
     </S.Container>
   );

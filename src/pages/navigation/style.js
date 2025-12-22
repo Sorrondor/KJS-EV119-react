@@ -2,51 +2,114 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
   background-color: #FAFAFA;
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
   padding-bottom: 120px;
 `;
 
 export const Header = styled.div`
   width: 100%;
-  padding: 24px 20px;
+  max-width: 100vw;
+  padding: 32px 40px;
   background-color: #FAFAFA;
   border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const HeaderContent = styled.div`
+  width: 60%;
+  max-width: 60%;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 export const BackButton = styled.button`
-  background: none;
-  border: none;
-  font-size: 18px;
+  background-color: #FFFFFF;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  font-size: 16px;
   color: #CD0B16;
   cursor: pointer;
-  padding: 8px 0;
+  padding: 10px 20px;
   margin-bottom: 12px;
   font-weight: 600;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   &:hover {
-    color: #B80F16;
+    background-color: #FFF5F5;
+    border-color: #CD0B16;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(205, 11, 22, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
 export const Title = styled.h1`
-  font-size: 28px;
+  width: 100%;
+  font-size: 32px;
   font-weight: 700;
   color: #CD0B16;
-  margin: 0;
+  margin: 0 0 12px 0;
+  box-sizing: border-box;
+`;
+
+export const MainContent = styled.div`
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 32px 40px;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  justify-content: center;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    padding: 24px 20px;
+  }
+`;
+
+export const MainContentWrapper = styled.div`
+  width: 60%;
+  max-width: 60%;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 export const Content = styled.div`
   flex: 1;
-  padding: 24px 20px;
-  max-width: 800px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   width: 100%;
   box-sizing: border-box;
+  padding-bottom: 100px; /* ActionButtons 공간 확보 */
 `;
 
 export const DestinationCard = styled.div`
@@ -214,13 +277,33 @@ export const ActionButtons = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  width: 100%;
+  max-width: 100vw;
+  padding: 20px 40px;
   background-color: #FAFAFA;
   border-top: 2px solid rgba(0, 0, 0, 0.05);
   display: flex;
-  gap: 12px;
+  justify-content: center;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
   z-index: 100;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    padding: 20px;
+  }
+`;
+
+export const ActionButtonsContent = styled.div`
+  width: 60%;
+  max-width: 60%;
+  display: flex;
+  gap: 12px;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 export const PrimaryButton = styled.button`

@@ -2,18 +2,40 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
   background-color: #FAFAFA;
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
 `;
 
 export const Header = styled.div`
   width: 100%;
-  padding: 24px 20px;
+  max-width: 100vw;
+  padding: 32px 40px;
   background-color: #FAFAFA;
   border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const HeaderContent = styled.div`
+  width: 60%;
+  max-width: 60%;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 export const BackButton = styled.button`
@@ -33,27 +55,60 @@ export const BackButton = styled.button`
 `;
 
 export const Title = styled.h1`
-  font-size: 28px;
+  width: 100%;
+  font-size: 32px;
   font-weight: 700;
   color: #CD0B16;
-  margin: 0;
+  margin: 0 0 12px 0;
+  box-sizing: border-box;
+`;
+
+export const MainContent = styled.div`
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 32px 40px;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  justify-content: center;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    padding: 24px 20px;
+  }
+`;
+
+export const MainContentWrapper = styled.div`
+  width: 60%;
+  max-width: 60%;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 export const Content = styled.div`
   flex: 1;
-  padding: 24px 20px;
-  max-width: 800px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   width: 100%;
   box-sizing: border-box;
+  padding-bottom: 100px; /* ActionButtons 공간 확보 */
 `;
 
 export const StatusSection = styled.div`
   margin-bottom: 32px;
-  padding: 20px;
-  background-color: #FFF9F9;
+  padding: 24px;
+  background-color: #FFFFFF;
   border-radius: 12px;
-  border: 2px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 `;
 
 export const StatusBadge = styled.div`
@@ -110,13 +165,18 @@ export const MessageBox = styled.div`
 
 export const InfoSection = styled.div`
   margin-bottom: 32px;
+  padding: 24px;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 `;
 
 export const SectionTitle = styled.h2`
   font-size: 20px;
   font-weight: 700;
   color: #CD0B16;
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   padding-bottom: 12px;
   border-bottom: 2px solid rgba(0, 0, 0, 0.15);
 `;
@@ -203,13 +263,33 @@ export const ActionButtons = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  width: 100%;
+  max-width: 100vw;
+  padding: 20px 40px;
   background-color: #FAFAFA;
   border-top: 2px solid rgba(0, 0, 0, 0.05);
   display: flex;
-  gap: 12px;
+  justify-content: center;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
   z-index: 100;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    padding: 20px;
+  }
+`;
+
+export const ActionButtonsContent = styled.div`
+  width: 60%;
+  max-width: 60%;
+  display: flex;
+  gap: 12px;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 export const PrimaryButton = styled.button`

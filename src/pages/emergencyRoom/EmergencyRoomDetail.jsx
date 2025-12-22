@@ -28,9 +28,9 @@ const EmergencyRoomDetail = () => {
       setLoading(true);
       setError(null);
 
-      // 백엔드 API 호출: 기관ID 기반 기본정보 조회
-      // 먼저 검색 API로 해당 병원 찾기
-      const searchUrl = `${BACKEND_URL}/api/emergency/search-emergency?lat=37.5665&lon=126.9780&pageNo=1&numOfRows=100`;
+      // 백엔드 API 호출: 기관ID 기반 기본정보 조회 (상태 정보 포함)
+      // 상태 정보가 포함된 API 사용
+      const searchUrl = `${BACKEND_URL}/api/emergency/search-emergency-with-status?lat=37.5665&lon=126.9780&pageNo=1&numOfRows=100`;
       
       const searchResponse = await fetch(searchUrl);
       
@@ -57,7 +57,9 @@ const EmergencyRoomDetail = () => {
       const dgidldName = item.dgidldName || '';
       const dutyTime1s = item.dutyTime1s || '';
       const dutyTime1c = item.dutyTime1c || '';
-      const hvec = parseInt(item.hvec || '0');
+      
+      // hvec 값을 null 체크와 함께 파싱 (MapContainer와 동일한 방식)
+      const hvec = item.hvec !== undefined && item.hvec !== null ? parseInt(item.hvec) : null;
       const hvoc = parseInt(item.hvoc || '0');
       const hvgc = parseInt(item.hvgc || '0');
       const hpicuyn = parseInt(item.hpicuyn || '0');
@@ -83,22 +85,50 @@ const EmergencyRoomDetail = () => {
         hours = `${startTime} - ${endTime}`;
       }
 
-      // 상태 결정
-      let status = 'available';
-      let waiting = 0;
-      let message = '현재 응급실이 여유롭습니다.';
+      // API에서 받은 상태 정보 사용 (API 응답에 status 필드가 있으면 우선 사용, 없으면 hvec 기반 계산)
+      let status = item.status || 'unknown';
+      let waiting = item.waiting || 0;
+      let message = item.message || '';
 
-      if (hvec === 0) {
-        status = 'full';
-        message = '현재 응급실이 포화 상태입니다. 수용이 어려울 수 있습니다.';
-      } else if (hvec < 5) {
-        status = 'crowded';
-        waiting = 10;
-        message = '현재 응급실이 혼잡합니다. 대기 시간이 예상보다 길 수 있습니다.';
-      } else if (hvec < 10) {
-        status = 'crowded';
-        waiting = 5;
-        message = '현재 응급실이 다소 혼잡합니다.';
+      // API에서 상태 정보가 없거나 unknown인 경우 hvec 기반으로 계산
+      if (!item.status || item.status === 'unknown') {
+        if (hvec === null) {
+          status = 'unknown';
+          message = '응급실 상태 정보를 확인할 수 없습니다.';
+        } else if (hvec === 0) {
+          status = 'full';
+          waiting = 0;
+          message = '현재 응급실이 포화 상태입니다. 수용이 어려울 수 있습니다.';
+        } else if (hvec < 5) {
+          status = 'crowded';
+          waiting = 10;
+          message = '현재 응급실이 혼잡합니다. 대기 시간이 예상보다 길 수 있습니다.';
+        } else if (hvec < 10) {
+          status = 'crowded';
+          waiting = 5;
+          message = '현재 응급실이 다소 혼잡합니다.';
+        } else {
+          status = 'available';
+          waiting = 0;
+          message = '현재 응급실이 여유롭습니다.';
+        }
+      } else {
+        // API에서 상태 정보를 받은 경우, 메시지가 없으면 기본 메시지 설정
+        if (!message) {
+          switch (status) {
+            case 'available':
+              message = '현재 응급실이 여유롭습니다.';
+              break;
+            case 'crowded':
+              message = '현재 응급실이 혼잡합니다. 대기 시간이 예상보다 길 수 있습니다.';
+              break;
+            case 'full':
+              message = '현재 응급실이 포화 상태입니다. 수용이 어려울 수 있습니다.';
+              break;
+            default:
+              message = '응급실 상태 정보를 확인할 수 없습니다.';
+          }
+        }
       }
 
       const roomData = {
@@ -141,12 +171,18 @@ const EmergencyRoomDetail = () => {
       <S.Container>
         <UserHeader />
         <S.Header>
-          <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
-          <S.Title>오류</S.Title>
+          <S.HeaderContent>
+            <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
+            <S.Title>오류</S.Title>
+          </S.HeaderContent>
         </S.Header>
-        <S.Content>
-          <S.ErrorMessage>{error || '병원 정보를 찾을 수 없습니다.'}</S.ErrorMessage>
-        </S.Content>
+        <S.MainContent>
+          <S.MainContentWrapper>
+            <S.Content>
+              <S.ErrorMessage>{error || '병원 정보를 찾을 수 없습니다.'}</S.ErrorMessage>
+            </S.Content>
+          </S.MainContentWrapper>
+        </S.MainContent>
       </S.Container>
     );
   }
@@ -189,11 +225,15 @@ const EmergencyRoomDetail = () => {
     <S.Container>
       <UserHeader />
       <S.Header>
-        <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
-        <S.Title>{room.fullName}</S.Title>
+        <S.HeaderContent>
+          <S.BackButton onClick={() => navigate(-1)}>← 뒤로</S.BackButton>
+          <S.Title>{room.fullName}</S.Title>
+        </S.HeaderContent>
       </S.Header>
 
-      <S.Content>
+      <S.MainContent>
+        <S.MainContentWrapper>
+          <S.Content>
         <S.StatusSection>
           <S.StatusBadge $color={getStatusColor(room.status)}>
             <S.StatusDot $color={getStatusColor(room.status)} />
@@ -209,15 +249,22 @@ const EmergencyRoomDetail = () => {
 
         <S.InfoSection>
           <S.SectionTitle>기본 정보</S.SectionTitle>
-          <S.InfoItem>
-            <S.InfoLabel>거리</S.InfoLabel>
-            <S.InfoValue>{room.distance} {room.time}</S.InfoValue>
-          </S.InfoItem>
+          {room.distance && (
+            <S.InfoItem>
+              <S.InfoLabel>거리</S.InfoLabel>
+              <S.InfoValue>{room.distance} {room.time}</S.InfoValue>
+            </S.InfoItem>
+          )}
           <S.InfoItem>
             <S.InfoLabel>주소</S.InfoLabel>
             <S.InfoValue>
-              {room.address}<br />
-              {room.detailAddress}
+              {room.address}
+              {room.detailAddress && (
+                <>
+                  <br />
+                  {room.detailAddress}
+                </>
+              )}
             </S.InfoValue>
           </S.InfoItem>
           <S.InfoItem>
@@ -260,15 +307,19 @@ const EmergencyRoomDetail = () => {
             ))}
           </S.FacilityList>
         </S.InfoSection>
-      </S.Content>
+          </S.Content>
+        </S.MainContentWrapper>
+      </S.MainContent>
 
       <S.ActionButtons>
-        <S.PrimaryButton onClick={handleRouteGuidance}>
-          경로 안내
-        </S.PrimaryButton>
-        <S.SecondaryButton onClick={handleCall}>
-          전화하기
-        </S.SecondaryButton>
+        <S.ActionButtonsContent>
+          <S.PrimaryButton onClick={handleRouteGuidance}>
+            경로 안내
+          </S.PrimaryButton>
+          <S.SecondaryButton onClick={handleCall}>
+            전화하기
+          </S.SecondaryButton>
+        </S.ActionButtonsContent>
       </S.ActionButtons>
     </S.Container>
   );

@@ -409,6 +409,21 @@ const MapContainer = () => {
     }
   };
 
+  // 상태에 따른 커스텀 마커 이미지 생성 (기본 마커와 동일한 모양, 색상만 변경)
+  const getCustomMarkerImage = (color) => {
+    const size = { width: 24, height: 35 };
+    // 카카오맵 기본 마커와 동일한 모양의 SVG (핀 모양)
+    const svg = `
+      <svg width="${size.width}" height="${size.height}" viewBox="0 0 24 35" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 0C5.4 0 0 5.4 0 12c0 8.4 12 23 12 23s12-14.6 12-23C24 5.4 18.6 0 12 0z" fill="${color}" stroke="#FFFFFF" stroke-width="1"/>
+        <circle cx="12" cy="12" r="5" fill="#FFFFFF"/>
+      </svg>
+    `;
+    // SVG를 data URL로 변환
+    const encodedSvg = encodeURIComponent(svg);
+    return `data:image/svg+xml,${encodedSvg}`;
+  };
+
   const performSearch = async () => {
     if (!searchTerm.trim()) return;
 
@@ -671,10 +686,17 @@ const MapContainer = () => {
                 {emergencyRooms.map((room) => {
                   if (!room.lat || !room.lng) return null;
 
+                  const statusColor = getStatusColor(room.status);
+                  const markerImage = getCustomMarkerImage(statusColor);
+
                   return (
                     <MapMarker
                       key={room.id}
                       position={{ lat: room.lat, lng: room.lng }}
+                      image={{
+                        src: markerImage,
+                        size: { width: 24, height: 35 }
+                      }}
                       clickable={true}
                       onClick={() => navigate(`/main/emergency-room/${room.hpid || room.id}`)}
                       title={room.name}
