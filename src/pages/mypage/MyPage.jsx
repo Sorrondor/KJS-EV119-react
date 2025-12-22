@@ -26,46 +26,50 @@ const MyPage = () => {
       });
     }
   };
-    const getMemberId = () => {
-      const member = JSON.parse(localStorage.getItem("member") || "null");
-      return member?.memberId ?? member?.id ?? null
-    }
 
-  
-    const withdrawFun = async() => {
-      const memberId= getMemberId();
-      if(!memberId) throw new Error("memberId를 찾을 수 없습니다.");
+  const getMemberId = () => {
+    const member = JSON.parse(localStorage.getItem("member") || "null");
+    return member?.memberId ?? member?.id ?? null;
+  };
 
-      const response = await fetch(`${API_BASE_URL}/api/member/withdraw?memberId=${memberId}`, {
+  const withdrawFun = async () => {
+    const memberId = getMemberId();
+    if (!memberId) throw new Error("memberId를 찾을 수 없습니다.");
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/member/withdraw?memberId=${memberId}`,
+      {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         credentials: "include",
-      });
-
-      const result = await response.json().catch(() => ({}));
-
-      if(!response.ok) {
-        const message = result?.message || "회원탈퇴에 실패했습니다.";
-        throw new Error(message);
       }
+    );
 
-      localStorage.clear();
-    };
+    const result = await response.json().catch(() => ({}));
 
-    const handleWithdraw = () => {
-      if(window.confirm("정말 탈퇴하시겠습니까?")) {
-        withdrawFun().then(() => {
+    if (!response.ok) {
+      const message = result?.message || "회원탈퇴에 실패했습니다.";
+      throw new Error(message);
+    }
+
+    localStorage.clear();
+  };
+
+  const handleWithdraw = () => {
+    if (window.confirm("정말 탈퇴하시겠습니까?")) {
+      withdrawFun()
+        .then(() => {
           alert("탈퇴가 완료되었습니다.");
           navigate("/");
         })
         .catch((error) => {
-          console.error(error)
-        })
-      }
+          console.error(error);
+        });
     }
-  
+  };
+
   return (
     <>
       <S.MenuSection>
@@ -123,47 +127,10 @@ const MyPage = () => {
           </S.MenuItem>
         </S.MenuList>
       </S.MenuSection>
-        <S.MenuSection>
-          <S.MenuTitle>건강정보 관리</S.MenuTitle>
-          <S.MenuList>
-            <S.MenuItem onClick={() => navigate("/main/health")}>
-              <S.MenuIcon>🏥</S.MenuIcon>
-              <S.MenuText>건강정보 조회/수정</S.MenuText>
-              <S.MenuArrow>›</S.MenuArrow>
-            </S.MenuItem>
-            <S.MenuItem onClick={() => navigate("/main/health")}>
-              <S.MenuIcon>💊</S.MenuIcon>
-              <S.MenuText>복용 중인 약물</S.MenuText>
-              <S.MenuArrow>›</S.MenuArrow>
-            </S.MenuItem>
-            <S.MenuItem onClick={() => navigate("/main/health")}>
-              <S.MenuIcon>⚠️</S.MenuIcon>
-              <S.MenuText>알레르기 정보</S.MenuText>
-              <S.MenuArrow>›</S.MenuArrow>
-            </S.MenuItem>
-            <S.MenuItem onClick={() => navigate("/main/health")}>
-              <S.MenuIcon>📞</S.MenuIcon>
-              <S.MenuText>응급연락처</S.MenuText>
-              <S.MenuArrow>›</S.MenuArrow>
-            </S.MenuItem>
-          </S.MenuList>
-        </S.MenuSection>
 
-        <S.MenuSection>
-          <S.MenuTitle>병원 방문 이력</S.MenuTitle>
-          <S.MenuList>
-            <S.MenuItem onClick={() => navigate("/main/visit-history")}>
-              <S.MenuIcon>📋</S.MenuIcon>
-              <S.MenuText>과거 병원방문 이력</S.MenuText>
-              <S.MenuArrow>›</S.MenuArrow>
-            </S.MenuItem>
-          </S.MenuList>
-        </S.MenuSection>
-
-        <S.LogoutButton onClick={handleLogout}>로그아웃</S.LogoutButton>
-        <S.LogoutButton onClick={handleWithdraw}>회원탈퇴</S.LogoutButton>
+      <S.LogoutButton onClick={handleLogout}>로그아웃</S.LogoutButton>
+      <S.LogoutButton onClick={handleWithdraw}>회원탈퇴</S.LogoutButton>
     </>
-
   );
 };
 
