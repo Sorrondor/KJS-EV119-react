@@ -39,18 +39,27 @@ export const HeaderContent = styled.div`
 `;
 
 export const BackButton = styled.button`
-  background: none;
-  border: none;
-  font-size: 18px;
+  background-color: #FFFFFF;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  font-size: 16px;
   color: #CD0B16;
   cursor: pointer;
-  padding: 8px 0;
+  padding: 10px 20px;
   margin-bottom: 12px;
   font-weight: 600;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   &:hover {
-    color: #B80F16;
+    background-color: #FFF5F5;
+    border-color: #CD0B16;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(205, 11, 22, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
