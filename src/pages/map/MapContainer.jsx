@@ -7,32 +7,41 @@ import * as S from './style';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:10000';
 
+// ✅ 숫자 파싱 유틸: 값이 없거나 공백이면 null 반환 (절대 0으로 강제하지 않음)
+const toNumberOrNull = (value) => {
+  if (value === undefined || value === null) return null;
+  const str = String(value).trim();
+  if (str === '') return null;
+  const num = Number(str);
+  return Number.isFinite(num) ? num : null;
+};
+
 const MapContainer = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('distance');
   const [currentPage, setCurrentPage] = useState(1);
-  const [location, setLocation] = useState(null);   
+  const [location, setLocation] = useState(null);
   const [map, setMap] = useState(null);
   const [emergencyRooms, setEmergencyRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
   const mapInstanceRef = useRef(null);
   const isInitialZoomSet = useRef(false);
-  
+
   const ITEMS_PER_PAGE = 4;
 
   const [myLocation, setMyLocation] = useState(null);
   const [currentAddress, setCurrentAddress] = useState('위치 정보를 가져오는 중...');
 
   const [center, setCenter] = useState({
-    lat: 37.5665,   
+    lat: 37.5665,
     lng: 126.9780,
   });
 
   const [kakaoLoading, error] = useKakaoLoader({
-    appkey: process.env.REACT_APP_KAKAO_KEY, 
-    libraries: ['services'], 
+    appkey: process.env.REACT_APP_KAKAO_KEY,
+    libraries: ['services'],
   });
 
   useEffect(() => {
@@ -46,11 +55,11 @@ const MapContainer = () => {
     let bestPosition = null;
     let bestAccuracy = Infinity;
 
-    // watchPosition으로 지속적으로 위치 업데이트하여 가장 정확한 위치 찾기
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
         positionCount++;
-        const accuracy = pos.coords.accuracy; // 미터 단위 정확도
+        const accuracy = pos.coords.accuracy;
+
         console.log(`위치 업데이트 #${positionCount}:`, {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
@@ -58,38 +67,34 @@ const MapContainer = () => {
           altitude: pos.coords.altitude,
           altitudeAccuracy: pos.coords.altitudeAccuracy,
           heading: pos.coords.heading,
-          speed: pos.coords.speed
+          speed: pos.coords.speed,
         });
 
-        // 더 정확한 위치를 찾으면 업데이트
         if (accuracy < bestAccuracy) {
           bestAccuracy = accuracy;
           bestPosition = pos;
-          
+
           const newCenter = {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
           };
-          
+
           console.log('더 정확한 위치 발견:', newCenter, `정확도: ${accuracy.toFixed(0)}m`);
           setCenter(newCenter);
-          
-          // 지도가 이미 생성되어 있으면 중심 이동
+
           if (mapInstanceRef.current && window.kakao && window.kakao.maps) {
             const { kakao } = window;
             const map = mapInstanceRef.current;
             const moveLatLon = new kakao.maps.LatLng(newCenter.lat, newCenter.lng);
             map.setCenter(moveLatLon);
           }
-          
-          // 정확도가 50m 이하이거나 5번 이상 업데이트되면 watchPosition 중지
+
           if (accuracy <= 50 || positionCount >= 5) {
             if (watchId !== null) {
               navigator.geolocation.clearWatch(watchId);
               watchId = null;
+
               console.log('위치 추적 중지. 최종 위치:', newCenter, `정확도: ${accuracy.toFixed(0)}m`);
-              
-              // 최종 위치로 응급실 정보 가져오기
               fetchEmergencyRooms(newCenter.lat, newCenter.lng);
             }
           }
@@ -100,25 +105,23 @@ const MapContainer = () => {
         if (watchId !== null) {
           navigator.geolocation.clearWatch(watchId);
         }
-        
-        // 실패하면 기본 서울 좌표로 응급실 정보 가져오기
+
         if (!bestPosition) {
           fetchEmergencyRooms(37.5665, 126.9780);
         }
       },
       {
-        enableHighAccuracy: true, // 높은 정확도 사용 (GPS 우선)
-        timeout: 15000, // 15초 타임아웃
-        maximumAge: 0 // 캐시 사용 안 함
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
       }
     );
 
-    // 10초 후 강제로 중지 (너무 오래 걸리지 않도록)
     const timeoutId = setTimeout(() => {
       if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
-        
+
         if (bestPosition) {
           const finalCenter = {
             lat: bestPosition.coords.latitude,
@@ -139,7 +142,6 @@ const MapContainer = () => {
       clearTimeout(timeoutId);
     };
   }, []);
-
 
   const kakaoMap = () => {
     if (!location) return;
@@ -167,17 +169,13 @@ const MapContainer = () => {
     console.log('현재 위치:', location);
   }, [location]);
 
-
   const CurrentLocationMarker = ({ map, location }) => {
     useEffect(() => {
       if (!map || !location || !window.kakao) return;
 
       const { kakao } = window;
 
-      const position = new kakao.maps.LatLng(
-        location.latitude,
-        location.longitude
-      );
+      const position = new kakao.maps.LatLng(location.latitude, location.longitude);
 
       const marker = new kakao.maps.Marker({
         position,
@@ -185,35 +183,31 @@ const MapContainer = () => {
 
       marker.setMap(map);
 
-      // cleanup
       return () => {
         marker.setMap(null);
       };
     }, [map, location]);
 
-    return null; 
+    return null;
   };
 
-  // 백엔드 API로 응급의료기관 위치정보 조회
+  
   const fetchEmergencyRooms = async (lat, lng) => {
     try {
       setLoading(true);
       setApiError(null);
 
-      // 백엔드 API 호출: 현재 위치 기반으로 응급실 검색
-      const url = `${BACKEND_URL}/api/emergency/search-emergency?lat=${lat}&lon=${lng}&pageNo=1&numOfRows=30`;
-      
+      const url = `${BACKEND_URL}/api/emergency/search-emergency-with-status?lat=${lat}&lon=${lng}&pageNo=1&numOfRows=30`;
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`API 호출 실패: ${response.status}`);
       }
 
       const data = await response.json();
-      
-      // API 응답 구조: data.body.items 또는 data.data.body.items
+
       const items = data?.data?.body?.items || data?.body?.items || data?.items || [];
-      
+
       if (items.length === 0) {
         setApiError('주변 응급실을 찾을 수 없습니다.');
         setLoading(false);
@@ -223,37 +217,43 @@ const MapContainer = () => {
       const rooms = items.map((item, index) => {
         const dutyName = item.dutyName || '';
         const dutyAddr = item.dutyAddr || '';
-        const latitude = parseFloat(item.latitude || item.wgs84Lat || '0');
-        const longitude = parseFloat(item.longitude || item.wgs84Lon || '0');
+        const latitude = toNumberOrNull(item.latitude ?? item.wgs84Lat) ?? 0;
+        const longitude = toNumberOrNull(item.longitude ?? item.wgs84Lon) ?? 0;
         const hpid = item.hpid || '';
         const dutyTel1 = item.dutyTel1 || '';
         const dutyTel3 = item.dutyTel3 || '';
-        const distance = parseFloat(item.distance || '0');
+        const distance = toNumberOrNull(item.distance) ?? 0;
         const dutyDivName = item.dutyDivName || '';
         const dutyEmclsName = item.dutyEmclsName || '';
-        const hvec = parseInt(item.hvec || '0'); // 응급실 병상
-        const hvgc = parseInt(item.hvgc || '0'); // 입원실 병상
+
+       
+        const hvec = toNumberOrNull(item.hvec); 
+        const hvgc = toNumberOrNull(item.hvgc); 
+
+       
+        const distanceKm =
+          distance > 0 ? distance : calculateDistance(lat, lng, latitude, longitude);
+        const distanceText =
+          distanceKm < 1 ? `${Math.round(distanceKm * 1000)}m` : `${distanceKm.toFixed(1)} km`;
+
         
-        // 거리 계산 (km)
-        const distanceKm = distance > 0 ? distance : calculateDistance(lat, lng, latitude, longitude);
-        const distanceText = distanceKm < 1 
-          ? `${Math.round(distanceKm * 1000)}m` 
-          : `${distanceKm.toFixed(1)} km`;
-        
-        // 병상 정보로 상태 결정
-        let status = 'available';
+        let status = 'unknown';
         let waiting = 0;
 
-        if (hvec === 0) {
-          status = 'full';
-        } else if (hvec < 5) {
-          status = 'crowded';
-          waiting = 10;
-        } else if (hvec < 10) {
-          status = 'crowded';
-          waiting = 5;
+        if (hvec !== null) {
+          if (hvec === 0) {
+            status = 'full';
+          } else if (hvec < 5) {
+            status = 'crowded';
+            waiting = 10;
+          } else if (hvec < 10) {
+            status = 'crowded';
+            waiting = 5;
+          } else {
+            status = 'available';
+          }
         }
-        
+
         return {
           id: hpid || `room-${index}`,
           hpid: hpid,
@@ -265,19 +265,21 @@ const MapContainer = () => {
           distanceValue: distanceKm,
           time: distanceKm < 1 ? '도보 약 5분' : distanceKm < 3 ? '차량 약 10분' : '차량 약 20분',
           phone: dutyTel3 || dutyTel1,
-          status: status,
-          waiting: waiting,
+          status,
+          waiting,
           specialties: dutyEmclsName ? [dutyEmclsName] : dutyDivName ? [dutyDivName] : [],
           hours: '24시간 응급실 운영',
+
+          hvec,
+          hvgc,
         };
       });
 
-      // 거리순 정렬
+ 
       rooms.sort((a, b) => a.distanceValue - b.distanceValue);
-      
+
       setEmergencyRooms(rooms);
-      
-      // 지도 범위 조정을 위한 플래그 리셋 (새로운 데이터 로드 시)
+
       isInitialZoomSet.current = false;
     } catch (error) {
       console.error('응급실 정보 조회 실패:', error);
@@ -287,20 +289,22 @@ const MapContainer = () => {
     }
   };
 
-  // 두 좌표 간 거리 계산 (Haversine formula)
+
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // 지구 반지름 (km)
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
-  // 좌표를 주소로 변환 (역지오코딩)
+
   const getAddressFromCoords = (lat, lng) => {
     if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
       return;
@@ -313,23 +317,21 @@ const MapContainer = () => {
       if (status === window.kakao.maps.services.Status.OK) {
         const address = result[0];
         let addressName = '';
-        
-        // 도로명 주소가 있으면 도로명 주소 사용, 없으면 지번 주소 사용
+
         if (address.road_address) {
           addressName = address.road_address.address_name;
         } else if (address.address) {
           addressName = address.address.address_name;
         }
-        
+
         if (addressName) {
-          // "서울특별시 강남구 역삼동" 형식에서 "서울 강남구 역삼동 근처" 형식으로 변환
           const formattedAddress = addressName
             .replace('서울특별시', '서울')
             .replace('광역시', '')
             .replace('특별시', '')
             .replace('특별자치시', '')
             .replace('특별자치도', '');
-          
+
           setCurrentAddress(`${formattedAddress} 근처`);
         } else {
           setCurrentAddress('주소를 가져올 수 없습니다.');
@@ -340,14 +342,12 @@ const MapContainer = () => {
     });
   };
 
-  // center가 변경될 때마다 주소 업데이트
   useEffect(() => {
     if (center.lat && center.lng && window.kakao && window.kakao.maps && window.kakao.maps.services) {
       getAddressFromCoords(center.lat, center.lng);
     }
   }, [center]);
 
-  // 지도가 생성된 후 center가 변경되면 지도 중심 업데이트
   useEffect(() => {
     if (!mapInstanceRef.current || !window.kakao || !window.kakao.maps) return;
     if (!center.lat || !center.lng) return;
@@ -358,34 +358,25 @@ const MapContainer = () => {
     map.setCenter(moveLatLon);
   }, [center]);
 
-  // 지도 범위 조정: 현재 위치와 가장 가까운 병원을 포함하도록
   useEffect(() => {
     if (!mapInstanceRef.current || !window.kakao || !window.kakao.maps) return;
-    if (isInitialZoomSet.current) return; // 이미 설정했으면 스킵
+    if (isInitialZoomSet.current) return;
     if (emergencyRooms.length === 0 || !center.lat || !center.lng) return;
 
     const { kakao } = window;
     const map = mapInstanceRef.current;
 
-    // 가장 가까운 병원 찾기 (이미 거리순으로 정렬되어 있음)
     const nearestRoom = emergencyRooms[0];
     if (!nearestRoom || !nearestRoom.lat || !nearestRoom.lng) return;
 
-    // 약간의 지연을 두어 지도가 완전히 렌더링된 후 실행
     setTimeout(() => {
-      // 현재 위치와 가장 가까운 병원을 포함하는 범위 설정
       const bounds = new kakao.maps.LatLngBounds();
-      
-      // 현재 위치 추가
+
       bounds.extend(new kakao.maps.LatLng(center.lat, center.lng));
-      
-      // 가장 가까운 병원 추가
       bounds.extend(new kakao.maps.LatLng(nearestRoom.lat, nearestRoom.lng));
-      
-      // 범위를 지도에 적용 (패딩 추가)
-      map.setBounds(bounds, 100); // 100px 패딩
-      
-      // 초기 줌 설정 완료
+
+      map.setBounds(bounds, 100);
+
       isInitialZoomSet.current = true;
     }, 100);
   }, [emergencyRooms, center]);
@@ -398,6 +389,7 @@ const MapContainer = () => {
         return '#FF9800';
       case 'full':
         return '#CD0B16';
+      case 'unknown':
       default:
         return '#9E9E9E';
     }
@@ -411,33 +403,28 @@ const MapContainer = () => {
         return '혼잡';
       case 'full':
         return '포화';
+      case 'unknown':
       default:
-        return '';
+        return '정보없음';
     }
   };
 
   const performSearch = async () => {
-    if (!searchTerm.trim()) {
-      return;
-    }
+    if (!searchTerm.trim()) return;
 
     const searchQuery = searchTerm.trim();
     setLoading(true);
     setApiError(null);
 
     try {
-      // 1. 먼저 병원명으로 검색 (응급실 목록에서)
-      const matchedHospital = emergencyRooms.find(room => 
-        room.name.includes(searchQuery) || 
-        room.address.includes(searchQuery)
+      const matchedHospital = emergencyRooms.find(
+        (room) => room.name.includes(searchQuery) || room.address.includes(searchQuery)
       );
 
       if (matchedHospital) {
-        // 병원을 찾았으면 해당 병원 위치로 이동
         const newCenter = { lat: matchedHospital.lat, lng: matchedHospital.lng };
         setCenter(newCenter);
-        
-        // 지도 중심 이동
+
         if (mapInstanceRef.current && window.kakao && window.kakao.maps) {
           const { kakao } = window;
           const map = mapInstanceRef.current;
@@ -445,30 +432,28 @@ const MapContainer = () => {
           map.setCenter(moveLatLon);
           map.setLevel(3);
         }
-        
+
         setLoading(false);
         return;
       }
 
-      // 2. 지역명으로 검색 (카카오맵 Places API 사용)
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
         throw new Error('카카오맵 서비스를 사용할 수 없습니다.');
       }
 
       const places = new window.kakao.maps.services.Places();
-      
+
       places.keywordSearch(searchQuery, (data, status) => {
         if (status === window.kakao.maps.services.Status.OK) {
           if (data && data.length > 0) {
             const firstResult = data[0];
             const newCenter = {
               lat: parseFloat(firstResult.y),
-              lng: parseFloat(firstResult.x)
+              lng: parseFloat(firstResult.x),
             };
-            
+
             setCenter(newCenter);
-            
-            // 지도 중심 이동
+
             if (mapInstanceRef.current && window.kakao && window.kakao.maps) {
               const { kakao } = window;
               const map = mapInstanceRef.current;
@@ -476,8 +461,7 @@ const MapContainer = () => {
               map.setCenter(moveLatLon);
               map.setLevel(3);
             }
-            
-            // 해당 지역의 응급실 검색
+
             fetchEmergencyRooms(newCenter.lat, newCenter.lng);
           } else {
             setApiError(`"${searchQuery}"에 대한 검색 결과가 없습니다.`);
@@ -506,8 +490,8 @@ const MapContainer = () => {
 
   const handleNearestRoute = () => {
     if (emergencyRooms.length === 0) return;
-    
-    const nearestRoom = emergencyRooms[0]; // 이미 거리순으로 정렬됨
+
+    const nearestRoom = emergencyRooms[0];
     if (nearestRoom) {
       navigate(`/main/navigation/${nearestRoom.hpid || nearestRoom.id}`);
     }
@@ -515,7 +499,7 @@ const MapContainer = () => {
 
   const getMyLocation = () => {
     if (!navigator.geolocation) {
-      alert("위치 정보를 지원하지 않는 브라우저입니다.");
+      alert('위치 정보를 지원하지 않는 브라우저입니다.');
       return;
     }
 
@@ -525,13 +509,13 @@ const MapContainer = () => {
 
         const next = { lat: latitude, lng: longitude };
 
-        setCenter(next);        
-        setMyLocation(next);    
+        setCenter(next);
+        setMyLocation(next);
 
-        console.log("현재위치", latitude, longitude);
+        console.log('현재위치', latitude, longitude);
       },
       (error) => {
-        console.error("위치 가져오기 실패", error);
+        console.error('위치 가져오기 실패', error);
       },
       { enableHighAccuracy: true }
     );
@@ -541,7 +525,6 @@ const MapContainer = () => {
     getMyLocation();
     console.log('위치 재탐색');
 
-    // 위치 재탐색 시 더 정확한 위치를 얻기 위해 watchPosition 사용
     let watchId = null;
     let positionCount = 0;
     let bestPosition = null;
@@ -554,31 +537,28 @@ const MapContainer = () => {
         console.log(`위치 재탐색 #${positionCount}:`, {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-          accuracy: `${accuracy.toFixed(0)}m`
+          accuracy: `${accuracy.toFixed(0)}m`,
         });
 
-        // 더 정확한 위치를 찾으면 업데이트
         if (accuracy < bestAccuracy) {
           bestAccuracy = accuracy;
           bestPosition = pos;
-          
+
           const newCenter = {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
           };
-          
+
           setCenter(newCenter);
-          
-          // 지도 중심을 현재 위치로 이동
+
           if (mapInstanceRef.current && window.kakao && window.kakao.maps) {
             const { kakao } = window;
             const map = mapInstanceRef.current;
             const moveLatLon = new kakao.maps.LatLng(newCenter.lat, newCenter.lng);
             map.setCenter(moveLatLon);
-            map.setLevel(3); // 줌 레벨 조정
+            map.setLevel(3);
           }
-          
-          // 정확도가 50m 이하이거나 3번 이상 업데이트되면 중지
+
           if (accuracy <= 50 || positionCount >= 3) {
             if (watchId !== null) {
               navigator.geolocation.clearWatch(watchId);
@@ -597,13 +577,12 @@ const MapContainer = () => {
         alert('위치를 다시 가져오는데 실패했습니다.');
       },
       {
-        enableHighAccuracy: true, // 높은 정확도 사용 (GPS 우선)
-        timeout: 15000, // 15초 타임아웃
-        maximumAge: 0 // 캐시 사용 안 함
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
       }
     );
 
-    // 8초 후 강제로 중지
     setTimeout(() => {
       if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
@@ -643,13 +622,10 @@ const MapContainer = () => {
               검색
             </S.SearchButton>
           </S.SearchContainer>
-          <S.RelocateButton onClick={handleRelocate}>
-            내 위치 재탐색
-          </S.RelocateButton>
-          <S.NearestRouteButton onClick={handleNearestRoute}>
-            가까운 경로 안내
-          </S.NearestRouteButton>
+          <S.RelocateButton onClick={handleRelocate}>내 위치 재탐색</S.RelocateButton>
+          <S.NearestRouteButton onClick={handleNearestRoute}>가까운 경로 안내</S.NearestRouteButton>
         </S.HeaderControls>
+
         <S.Legend>
           <S.LegendItem>
             <S.LegendDot $color="#00C853" />
@@ -662,6 +638,10 @@ const MapContainer = () => {
           <S.LegendItem>
             <S.LegendDot $color="#CD0B16" />
             <span>응급실(포화)</span>
+          </S.LegendItem>
+          <S.LegendItem>
+            <S.LegendDot $color="#9E9E9E" />
+            <span>정보없음</span>
           </S.LegendItem>
         </S.Legend>
       </S.Header>
@@ -679,7 +659,6 @@ const MapContainer = () => {
                 isPanto={true}
                 onCreate={(map) => {
                   mapInstanceRef.current = map;
-                  // 지도 생성 시 현재 위치로 중심 설정
                   if (center.lat && center.lng && window.kakao && window.kakao.maps) {
                     const { kakao } = window;
                     const moveLatLon = new kakao.maps.LatLng(center.lat, center.lng);
@@ -687,15 +666,11 @@ const MapContainer = () => {
                   }
                 }}
               >
-                {/* 현재 위치 마커 */}
-                <MapMarker 
-                  position={center}
-                />
-                
-                {/* 병원 위치 마커들 */}
+                <MapMarker position={center} />
+
                 {emergencyRooms.map((room) => {
                   if (!room.lat || !room.lng) return null;
-                  
+
                   return (
                     <MapMarker
                       key={room.id}
@@ -719,7 +694,7 @@ const MapContainer = () => {
               value={sortBy}
               onChange={(e) => {
                 setSortBy(e.target.value);
-                setCurrentPage(1); // 정렬 변경 시 첫 페이지로
+                setCurrentPage(1);
               }}
             >
               <option value="distance">정렬 기준 거리순</option>
@@ -740,30 +715,30 @@ const MapContainer = () => {
               <S.LegendDot $color="#CD0B16" />
               <span>포화 / 수용 불가</span>
             </S.LegendItem>
+            <S.LegendItem>
+              <S.LegendDot $color="#9E9E9E" />
+              <span>정보없음</span>
+            </S.LegendItem>
           </S.StatusLegend>
 
-          {loading && (
-            <S.LoadingMessage>응급실 정보를 불러오는 중...</S.LoadingMessage>
-          )}
-          {apiError && (
-            <S.ErrorMessage>오류: {apiError}</S.ErrorMessage>
-          )}
+          {loading && <S.LoadingMessage>응급실 정보를 불러오는 중...</S.LoadingMessage>}
+          {apiError && <S.ErrorMessage>오류: {apiError}</S.ErrorMessage>}
           {!loading && !apiError && emergencyRooms.length === 0 && (
             <S.EmptyMessage>주변 응급실을 찾을 수 없습니다.</S.EmptyMessage>
           )}
+
           {!loading && !apiError && emergencyRooms.length > 0 && (() => {
-            // 정렬된 데이터
             const sortedRooms = [...emergencyRooms].sort((a, b) => {
               if (sortBy === 'distance') {
                 return a.distanceValue - b.distanceValue;
               } else if (sortBy === 'status') {
-                const statusOrder = { available: 1, crowded: 2, full: 3 };
+                // ✅ unknown은 마지막으로 보내기 (원하면 맨 앞으로도 가능)
+                const statusOrder = { available: 1, crowded: 2, full: 3, unknown: 4 };
                 return statusOrder[a.status] - statusOrder[b.status];
               }
               return 0;
             });
 
-            // 페이지네이션 계산
             const totalPages = Math.ceil(sortedRooms.length / ITEMS_PER_PAGE);
             const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
             const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -782,17 +757,19 @@ const MapContainer = () => {
                         <S.StatusBadge $color={getStatusColor(room.status)}>
                           <S.StatusDot $color={getStatusColor(room.status)} />
                           {getStatusText(room.status)}
-                          {room.status !== 'full' && room.waiting > 0 && ` (대기 ${room.waiting}명)`}
+                          {room.status !== 'full' && room.status !== 'unknown' && room.waiting > 0 && ` (대기 ${room.waiting}명)`}
                         </S.StatusBadge>
                       </S.RoomHeader>
+
                       <S.RoomAddress>{room.address}</S.RoomAddress>
                       {room.hours && <S.RoomHours>{room.hours}</S.RoomHours>}
+
                       <S.RoomDistance>
                         {room.distance} {room.time}
                       </S.RoomDistance>
-                      {room.phone && (
-                        <S.RoomPhone>전화: {room.phone}</S.RoomPhone>
-                      )}
+
+                      {room.phone && <S.RoomPhone>전화: {room.phone}</S.RoomPhone>}
+
                       {room.specialties && room.specialties.length > 0 && (
                         <S.RoomSpecialties>
                           {room.specialties.map((specialty, idx) => (
@@ -804,11 +781,10 @@ const MapContainer = () => {
                   ))}
                 </S.EmergencyRoomList>
 
-                {/* 페이지네이션 */}
                 {totalPages > 1 && (
                   <S.Pagination>
                     <S.PaginationButton
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
                     >
                       이전
@@ -817,7 +793,7 @@ const MapContainer = () => {
                       {currentPage} / {totalPages}
                     </S.PaginationInfo>
                     <S.PaginationButton
-                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
                     >
                       다음
@@ -832,9 +808,7 @@ const MapContainer = () => {
             ※ 실제 혼잡도 및 수용 가능 여부는 각 병원과의 연동 데이터 기준입니다.
           </S.Disclaimer>
           <S.UpdateLink>응급실 정보 업데이트 기준 보기</S.UpdateLink>
-          <S.HelpButton onClick={() => navigate('/main/help')}>
-            도움말
-          </S.HelpButton>
+          <S.HelpButton onClick={() => navigate('/main/help')}>도움말</S.HelpButton>
         </S.InfoPanel>
       </S.MainContent>
       <PatientAlertButton />
